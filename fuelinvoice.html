@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bahar Service Station - Professional Billing Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #004b87; 
+            --bg-color: #e2e8f0; 
+            --text-main: #1e293b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --bar-bg: #0f172a;
+        }
+
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: var(--bg-color); 
+            margin: 0; 
+            padding: 40px 20px 120px 20px; 
+            color: var(--text-main); 
+        }
+
+        .invoice-container {
+            background: white;
+            padding: 50px;
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            max-width: 850px;
+            margin: 0 auto;
+            overflow-x: auto;
+        }
+
+        .editable-field { 
+            border: 1px dashed transparent; 
+            padding: 4px; 
+            border-radius: 4px; 
+            outline: none; 
+            transition: 0.2s;
+            min-width: 20px;
+            display: inline-block;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .editable-field:hover, .editable-field:focus { 
+            background: #f8fafc; 
+            border-color: #cbd5e1;
+        }
+        .editable-field:empty:before { 
+            content: attr(data-placeholder); 
+            color: #94a3b8; 
+            font-style: italic; 
+        }
+
+        select {
+            padding: 4px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-weight: bold;
+            font-family: inherit;
+            cursor: pointer;
+            background: #f8fafc;
+            color: var(--text-main);
+        }
+        .col-type-select { font-size: 0.8rem; padding: 2px; font-weight: normal; }
+
+        /* Unified Table Styles */
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0.5rem;
+            margin-top: 1rem;
+        }
+        .invoice-table th, .invoice-table td {
+            border: 1px solid #94a3b8;
+            padding: 10px;
+            text-align: right;
+            font-size: 0.9rem;
+            vertical-align: top;
+        }
+        .invoice-table td:first-child, .invoice-table th:first-child { text-align: left; }
+        .action-col { width: 40px; text-align: center !important; }
+        
+        .invoice-table th {
+            background: #f1f5f9;
+            text-align: center;
+            color: var(--text-main);
+        }
+        .col-controls {
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 5px;
+            align-items: center;
+            gap: 5px;
+        }
+        .controls-row {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+
+        button {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: 0.2s;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        button:hover { filter: brightness(0.9); }
+        .btn-primary { background: #3b82f6; }
+        .btn-secondary { background: #64748b; }
+        .btn-save { background: var(--success); }
+        .btn-clear { background: var(--danger); }
+        .btn-action { background: #0284c7; }
+        .btn-small { padding: 4px 10px; font-size: 0.85rem; margin: 0; background: var(--primary); }
+        .btn-del-col { padding: 2px 6px; font-size: 0.75rem; background: var(--danger); }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--bar-bg);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            box-sizing: border-box;
+        }
+        .bar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .branding { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px; }
+        .branding span { font-size: 0.8rem; font-weight: 400; color: #94a3b8; }
+        .actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .file-input-group { display: flex; align-items: center; background: #1e293b; border-radius: 6px; padding: 0 5px 0 12px; border: 1px solid #334155; }
+        .file-input-group span { font-size: 0.85rem; color: #94a3b8; }
+        .filename-input { background: transparent; border: none; color: white; padding: 10px 8px; font-family: inherit; outline: none; width: 160px; font-weight: 500; }
+
+        @media print {
+            @page { size: A4 portrait; margin: 15mm; }
+            body { background: white; margin: 0; padding: 0; }
+            .no-print { display: none !important; }
+            
+            .invoice-container { box-shadow: none; border: none; padding: 0; max-width: 100%; width: 100%; }
+            .editable-field { border: none !important; padding: 0 !important; background: transparent !important; }
+            select { border: none !important; appearance: none; -webkit-appearance: none; background: transparent; padding: 0; }
+
+            .invoice-table { width: 100%; border-collapse: collapse; }
+            .invoice-table th, .invoice-table td { border: 1px solid #000 !important; padding: 6px !important; }
+            .invoice-table thead { display: table-header-group !important; }
+            .invoice-table tr { page-break-inside: avoid !important; }
+            .invoice-table th, .total-row { 
+                background-color: #e2e8f0 !important; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="invoice-container" id="printableInvoice">
+        
+        <div style="display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 3px solid var(--primary); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Official_BPCL_LOGO.jpg" alt="BPCL" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 80px; height: auto;">
+            <div style="text-align: center; width: 100%; padding: 0 90px;">
+                <h1 style="margin:0; color:var(--primary); font-size: 1.6rem; font-weight: 800; letter-spacing: 1px;">M/S. BAHAR SERVICE STATION</h1>
+                <p style="margin:4px 0 2px 0; font-weight: 700; font-size: 1rem;">DEALER: BHARAT PETROLEUM CORP LTD.</p>
+                <p style="margin:2px 0; font-size: 0.85rem; color: #334155;">VILL-DEVOKE, P.O.MAMUDPUR, P.S.SHIBDASPUR, DIST-N24 PARGANAS, PIN 743166, WB</p>
+                <p style="margin:2px 0; font-size: 0.85rem; color: #334155;">CONTACT - 7018579966, 9088086294</p>
+                <p style="margin:2px 0; font-size: 0.85rem; color: #334155;">EMAIL - BAHARSERVICESTATION@GMAIL.COM</p>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem; font-size: 0.95rem; font-weight: 600;">
+            <div contenteditable="true" class="editable-field" data-placeholder="Ref No: [Enter Ref Number]" style="width: auto; min-width: 200px;">Ref No: BSS/BDO2627/01</div>
+            <div contenteditable="true" class="editable-field" id="printDate" style="width: auto; min-width: 150px;">Date: 21/4/2026</div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem; font-size: 0.95rem;">
+            <div contenteditable="true" class="editable-field" style="line-height: 1.6; font-weight: 500;" data-placeholder="To Address">
+                <strong>To,</strong><br>
+                The S.D.O<br>
+                Barrackpore, North 24 PGS,<br>
+                Kolkata-700120
+            </div>
+        </div>
+
+        <div contenteditable="true" class="editable-field" style="margin-bottom: 1.5rem; font-size: 0.95rem; font-weight: 700;" data-placeholder="Subject: [Enter Subject Here]">
+            <strong>Subject:</strong> Submission of bills for issuing of fuel to S.D.O Barrackpore
+        </div>
+
+        <div contenteditable="true" class="editable-field" style="margin-bottom: 1rem; line-height: 1.6; font-size: 0.95rem;" data-placeholder="Body Text...">
+            Sir,<br><br>
+            With due respect I beg to submit the Fuel bills of assembly election, for your kind perusal and farther as early as possible.<br><br>
+            The following table:
+        </div>
+        
+        <table class="invoice-table" id="mainInvoiceTable">
+            <thead>
+                <tr id="tableHeaderRow">
+                    <th>
+                        <div class="col-controls no-print">
+                            <select class="col-type-select" onchange="syncSelect(this); calculateAll();">
+                                <option value="text" selected>Text Info</option>
+                                <option value="qty">Quantity</option>
+                                <option value="rate">Rate</option>
+                                <option value="amount">Amount</option>
+                            </select>
+                            <button class="btn-del-col" onclick="deleteColumn(this)">X</button>
+                        </div>
+                        <div contenteditable="true" class="editable-field" style="font-weight:bold; text-align:left;">PAGE REFERENCE</div>
+                    </th>
+                    <th>
+                        <div class="col-controls no-print">
+                            <select class="col-type-select" onchange="syncSelect(this); calculateAll();">
+                                <option value="text">Text Info</option>
+                                <option value="qty" selected>Quantity</option>
+                                <option value="rate">Rate</option>
+                                <option value="amount">Amount</option>
+                            </select>
+                            <button class="btn-del-col" onclick="deleteColumn(this)">X</button>
+                        </div>
+                        <div contenteditable="true" class="editable-field" style="font-weight:bold; text-align:center;">TOTAL QUANTITY (L)</div>
+                    </th>
+                    <th>
+                        <div class="col-controls no-print">
+                            <select class="col-type-select" onchange="syncSelect(this); calculateAll();">
+                                <option value="text">Text Info</option>
+                                <option value="qty">Quantity</option>
+                                <option value="rate">Rate</option>
+                                <option value="amount" selected>Amount</option>
+                            </select>
+                            <button class="btn-del-col" onclick="deleteColumn(this)">X</button>
+                        </div>
+                        <div contenteditable="true" class="editable-field" style="font-weight:bold; text-align:center;">TOTAL AMOUNT (₹)</div>
+                    </th>
+                    <th class="action-col no-print">Del</th>
+                </tr>
+            </thead>
+            
+            <tbody id="invoiceTableBody">
+                <tr class="item-row">
+                    <td><div contenteditable="true" class="editable-field" data-placeholder="Description...">Page 1 (Bills 1-50)</div></td>
+                    <td><div contenteditable="true" class="editable-field val-qty" style="text-align: right;" data-placeholder="0.00">1800.00</div></td>
+                    <td><div contenteditable="true" class="editable-field val-amount" style="text-align: right;" data-placeholder="0.00">166158.00</div></td>
+                    <td class="action-col no-print"><button class="btn-small btn-clear" onclick="deleteRow(this)">X</button></td>
+                </tr>
+                <tr class="item-row">
+                    <td><div contenteditable="true" class="editable-field" data-placeholder="Description...">Page 2 (Bills 51-100)</div></td>
+                    <td><div contenteditable="true" class="editable-field val-qty" style="text-align: right;" data-placeholder="0.00">1517.00</div></td>
+                    <td><div contenteditable="true" class="editable-field val-amount" style="text-align: right;" data-placeholder="0.00">140436.27</div></td>
+                    <td class="action-col no-print"><button class="btn-small btn-clear" onclick="deleteRow(this)">X</button></td>
+                </tr>
+                <tr class="item-row">
+                    <td><div contenteditable="true" class="editable-field" data-placeholder="Description...">Page 3 (Bills 101-150)</div></td>
+                    <td><div contenteditable="true" class="editable-field val-qty" style="text-align: right;" data-placeholder="0.00">40.00</div></td>
+                    <td><div contenteditable="true" class="editable-field val-amount" style="text-align: right;" data-placeholder="0.00">4228.40</div></td>
+                    <td class="action-col no-print"><button class="btn-small btn-clear" onclick="deleteRow(this)">X</button></td>
+                </tr>
+            </tbody>
+
+            <tbody>
+                <tr style="height: 10px; border: none;"><td colspan="4" style="border: none; padding: 0;"></td></tr>
+            </tbody>
+
+            <tbody id="adjustmentsBody">
+                <tr class="total-row" id="grossTotalRow" style="font-weight:bold; border-top: 2px solid #000; background-color: #f1f5f9;">
+                    </tr>
+                
+                <tr class="adj-row">
+                    <td class="adj-desc-cell" style="text-align: right;">
+                        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
+                            <div contenteditable="true" class="editable-field" style="text-align: right;" data-placeholder="Desc (e.g. Less Advance)">Less Advance Paid</div>
+                            <select class="operator-select no-print" onchange="syncSelect(this); calculateAll();">
+                                <option value="-" selected>- Amt</option>
+                                <option value="+">+ Amt</option>
+                                <option value="-%">-% Pct</option>
+                                <option value="+%">+% Pct</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td style="width:120px; text-align: right;"><div contenteditable="true" class="editable-field val-adj" style="text-align: right;" data-placeholder="0.00">0.00</div></td>
+                    <td class="action-col no-print"><button class="btn-small btn-clear" onclick="deleteRow(this)">X</button></td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td class="footer-desc-cell" style="text-align: right;">Rounding Off (+/-)</td>
+                    <td id="roundingOutput" style="text-align: right; width:120px;">0.00</td>
+                    <td class="action-col no-print"></td>
+                </tr>
+                <tr class="total-row" style="font-weight:bold; font-size:1.1rem; color:var(--primary); background-color: #f1f5f9;">
+                    <td class="footer-desc-cell" style="text-align: right;">FINAL NET PAYABLE</td>
+                    <td style="text-align: right; width:120px;">₹<span id="finalNetOutput">0.00</span></td>
+                    <td class="action-col no-print"></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="controls-row no-print">
+            <button class="btn-small" onclick="addItemRow()">+ Add Row</button>
+            <button class="btn-small btn-action" onclick="addColumn()">+ Add Column (e.g., Rate)</button>
+            <button class="btn-small" style="background:#8b5cf6;" onclick="addAdjustmentRow()">+ Add Custom Deduction/Tax</button>
+        </div>
+
+        <div style="margin-top: 3rem; display: flex; justify-content: space-between; font-size: 0.95rem; page-break-inside: avoid;">
+            <div></div>
+            <div style="text-align: center;">
+                <p style="margin: 0;">Yours faithfully,</p>
+                <br><br><br>
+                <strong contenteditable="true" class="editable-field">M/S. Bahar Service Station</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar no-print">
+        <div class="bar-content">
+            <div class="branding">
+                Bahar Billing Engine 
+                <span>Professional Suite</span>
+            </div>
+            
+            <div class="actions">
+                <div class="file-input-group">
+                    <span>File Name:</span>
+                    <input type="text" id="filenameInput" class="filename-input" />
+                </div>
+                <button class="btn-primary" onclick="exportAndSharePDF()" id="shareBtn">📤 Share / Export PDF</button>
+                <button class="btn-secondary" onclick="window.print()">🖨️ Print</button>
+                <button class="btn-save" onclick="saveInvoice()" id="saveBtn">💾 Save Draft</button>
+                <button class="btn-clear" onclick="clearInvoice()">🗑️ Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateAll() {
+            let qtyIdx = -1, rateIdx = -1, amountIdx = -1;
+            const headers = document.querySelectorAll('#tableHeaderRow th');
+            const colCount = headers.length - 1; 
+            
+            headers.forEach((th, idx) => {
+                const select = th.querySelector('.col-type-select');
+                if (select) {
+                    if (select.value === 'qty') qtyIdx = idx;
+                    if (select.value === 'rate') rateIdx = idx;
+                    if (select.value === 'amount') amountIdx = idx;
+                }
+            });
+
+            let totalQty = 0;
+            let grossTotal = 0;
+
+            document.querySelectorAll('.item-row').forEach(row => {
+                const cells = row.children;
+                let rowQty = 0, rowRate = 0, rowAmount = 0;
+
+                if (qtyIdx > -1 && cells[qtyIdx]) {
+                    const field = cells[qtyIdx].querySelector('.editable-field');
+                    if(field) {
+                        rowQty = parseFloat(field.innerText) || 0;
+                        totalQty += rowQty;
+                    }
+                }
+                if (rateIdx > -1 && cells[rateIdx]) {
+                    const field = cells[rateIdx].querySelector('.editable-field');
+                    if(field) rowRate = parseFloat(field.innerText) || 0;
+                }
+
+                if (qtyIdx > -1 && rateIdx > -1) {
+                    rowAmount = rowQty * rowRate;
+                    if (amountIdx > -1 && cells[amountIdx]) {
+                        const field = cells[amountIdx].querySelector('.editable-field');
+                        if(field) field.innerText = rowAmount.toFixed(2);
+                    }
+                } else if (amountIdx > -1 && cells[amountIdx]) {
+                    const field = cells[amountIdx].querySelector('.editable-field');
+                    if(field) rowAmount = parseFloat(field.innerText) || 0;
+                }
+                
+                grossTotal += rowAmount;
+            });
+
+            const grossTotalRow = document.getElementById('grossTotalRow');
+            grossTotalRow.innerHTML = '';
+            
+            // Build the gross total row precisely mapping exactly to the column headers
+            for(let i = 0; i < colCount; i++) {
+                const td = document.createElement('td');
+                if (i === 0) {
+                    td.innerText = "GROSS TOTAL";
+                    td.style.textAlign = "left";
+                } else if (i === qtyIdx) {
+                    td.innerText = totalQty.toFixed(2);
+                    td.style.textAlign = "right"; 
+                    td.style.fontWeight = "bold";
+                } else if (i === amountIdx) {
+                    td.innerText = grossTotal.toFixed(2);
+                    td.style.textAlign = "right"; 
+                    td.style.fontWeight = "bold";
+                } else {
+                    td.innerText = "";
+                }
+                grossTotalRow.appendChild(td);
+            }
+            grossTotalRow.insertAdjacentHTML('beforeend', '<td class="action-col no-print"></td>');
+
+            // Set colspan so lower rows stretch exactly to the Amount column
+            let descColspan = Math.max(1, colCount - 1); 
+            document.querySelectorAll('.adj-desc-cell').forEach(c => c.colSpan = descColspan);
+            document.querySelectorAll('.footer-desc-cell').forEach(c => c.colSpan = descColspan);
+
+            let netTotal = grossTotal;
+            document.querySelectorAll('.adj-row').forEach(row => {
+                let operator = row.querySelector('.operator-select').value;
+                let val = parseFloat(row.querySelector('.val-adj').innerText) || 0;
+                if (operator === '+') netTotal += val;
+                else if (operator === '-') netTotal -= val;
+                else if (operator === '+%') netTotal += (grossTotal * (val / 100));
+                else if (operator === '-%') netTotal -= (grossTotal * (val / 100));
+            });
+
+            let finalNet = Math.round(netTotal);
+            let rounding = finalNet - netTotal;
+
+            document.getElementById('roundingOutput').innerText = (rounding > 0 ? "+" : "") + rounding.toFixed(2);
+            document.getElementById('finalNetOutput').innerText = finalNet.toFixed(2);
+        }
+
+        function addColumn() {
+            const theadTr = document.getElementById('tableHeaderRow');
+            const actionTh = theadTr.lastElementChild;
+            const newTh = document.createElement('th');
+            
+            newTh.innerHTML = `
+                <div class="col-controls no-print">
+                    <select class="col-type-select" onchange="syncSelect(this); calculateAll();">
+                        <option value="text">Text Info</option>
+                        <option value="qty">Quantity</option>
+                        <option value="rate" selected>Rate</option>
+                        <option value="amount">Amount</option>
+                    </select>
+                    <button class="btn-del-col" onclick="deleteColumn(this)">X</button>
+                </div>
+                <div contenteditable="true" class="editable-field" style="font-weight:bold; text-align:center;" data-placeholder="New Col">RATE (₹)</div>
+            `;
+            theadTr.insertBefore(newTh, actionTh);
+
+            document.querySelectorAll('.item-row').forEach(row => {
+                const actionTd = row.lastElementChild;
+                const newTd = document.createElement('td');
+                newTd.innerHTML = `<div contenteditable="true" class="editable-field val-rate" style="text-align:right;" data-placeholder="0.00">0</div>`;
+                row.insertBefore(newTd, actionTd);
+            });
+            calculateAll();
+        }
+
+        function deleteColumn(btn) {
+            const th = btn.closest('th');
+            const tr = th.parentElement;
+            const idx = Array.from(tr.children).indexOf(th);
+            th.remove();
+            document.querySelectorAll('.item-row').forEach(row => {
+                if(row.children[idx]) row.children[idx].remove();
+            });
+            calculateAll();
+        }
+
+        function addItemRow() {
+            const tbody = document.getElementById('invoiceTableBody');
+            const tr = document.createElement('tr');
+            tr.className = 'item-row';
+            
+            const colCount = document.querySelectorAll('#tableHeaderRow th').length - 1;
+            let html = '';
+            for(let i=0; i<colCount; i++) {
+                html += `<td><div contenteditable="true" class="editable-field" style="text-align:${i===0 ? 'left' : 'right'};" data-placeholder="${i===0 ? 'Description...' : '0.00'}"></div></td>`;
+            }
+            html += `<td class="action-col no-print"><button class="btn-small btn-clear" onclick="deleteRow(this)">X</button></td>`;
+            
+            tr.innerHTML = html;
+            tbody.appendChild(tr);
+            calculateAll();
+        }
+
+        function addAdjustmentRow() {
+            const tbody = document.getElementById('adjustmentsBody');
+            const tr = document.createElement('tr');
+            tr.className = 'adj-row';
+            tr.innerHTML = `
+                <td class="adj-desc-cell" style="text-align: right;">
+                    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
+                        <div contenteditable="true" class="editable-field" style="text-align: right;" data-placeholder="Desc (e.g. GST +18%)"></div>
+                        <select class="operator-select no-print" onchange="syncSelect(this); calculateAll();">
+                            <option value="-">- Amt</option>
+                            <option value="+">+ Amt</option>
+                            <option value="-%">-% Pct</option>
+                            <option value="+%">+% Pct</option>
+                        </select>
+                    </div>
+                </td>
+                <td style="width:120px; text-align: right;"><div contenteditable="true" class="editable-field val-adj" style="text-align: right;" data-placeholder="0.00">0</div></td>
+                <td class="action-col no-print"><button class="btn-small btn-clear" onclick="deleteRow(this)">X</button></td>
+            `;
+            tbody.appendChild(tr);
+            calculateAll();
+        }
+
+        function deleteRow(btn) { btn.closest('tr').remove(); calculateAll(); }
+
+        function syncSelect(selectElem) {
+            Array.from(selectElem.options).forEach(opt => opt.removeAttribute('selected'));
+            selectElem.options[selectElem.selectedIndex].setAttribute('selected', 'selected');
+        }
+
+        async function exportAndSharePDF() {
+            const btn = document.getElementById('shareBtn');
+            btn.innerText = "⏳ Generating...";
+            
+            const filenameInput = document.getElementById('filenameInput').value.trim() || 'Bahar_Invoice';
+            const finalFilename = `${filenameInput}.pdf`;
+            const element = document.getElementById('printableInvoice');
+
+            const noPrintElements = element.querySelectorAll('.no-print');
+            noPrintElements.forEach(el => el.style.display = 'none');
+
+            const opt = {
+                margin:       [15, 10, 15, 10], 
+                filename:     finalFilename,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, windowWidth: 850 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            try {
+                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+                const file = new File([pdfBlob], finalFilename, { type: 'application/pdf' });
+
+                noPrintElements.forEach(el => el.style.display = '');
+                btn.innerText = "📤 Share / Export PDF";
+
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({ title: filenameInput, text: 'Please find the attached invoice.', files: [file] });
+                } else {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(pdfBlob);
+                    link.download = finalFilename;
+                    link.click();
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error generating PDF. Try using the Print button instead.");
+                noPrintElements.forEach(el => el.style.display = '');
+                btn.innerText = "📤 Share / Export PDF";
+            }
+        }
+
+        function saveInvoice() {
+            document.querySelectorAll('select').forEach(sel => syncSelect(sel));
+            const invoiceHTML = document.getElementById('printableInvoice').innerHTML;
+            localStorage.setItem('BaharSavedData_Pro_Aligned', invoiceHTML);
+            
+            const btn = document.getElementById('saveBtn');
+            btn.innerText = "✅ Saved!";
+            setTimeout(() => btn.innerText = "💾 Save Draft", 2000);
+        }
+
+        function loadInvoice() {
+            const savedData = localStorage.getItem('BaharSavedData_Pro_Aligned');
+            if (savedData) document.getElementById('printableInvoice').innerHTML = savedData;
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('filenameInput').value = "BSS_INV_" + today;
+            document.getElementById('printableInvoice').addEventListener('input', calculateAll);
+        }
+
+        function clearInvoice() {
+            if(confirm("Are you sure you want to completely reset? This restores original data and deletes custom entries.")) {
+                localStorage.removeItem('BaharSavedData_Pro_Aligned');
+                location.reload();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { loadInvoice(); calculateAll(); });
+
+    </script>
+</body>
+</html>

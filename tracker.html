@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliance Tracker - Bahar Service Station</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-blue: #004b87; 
+            --secondary-blue: #003366;
+            --bg-light: #f4f7f6;
+            --text-dark: #333333;
+            --border-color: #dee2e6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            margin: 0; padding: 0 0 80px 0; font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-light); color: var(--text-dark);
+        }
+
+        /* --- HEADER --- */
+        .top-bar { background-color: var(--text-dark); color: white; font-size: 0.8rem; padding: 5px 5%; text-align: center; }
+        .header-main { background: white; padding: 15px 5%; display: flex; align-items: center; gap: 15px; border-bottom: 3px solid var(--warning); flex-wrap: wrap; justify-content: center; }
+        .header-main img { height: 60px; }
+        .header-text { text-align: center; }
+        @media (min-width: 600px) { .header-text { text-align: left; } .header-main { justify-content: flex-start; } }
+        .header-text h1 { margin: 0; color: var(--primary-blue); font-size: clamp(1.2rem, 3vw, 1.6rem); font-weight: 900; }
+        .header-text p { margin: 2px 0 0 0; font-size: 0.85rem; font-weight: 700; color: #555; }
+
+        /* --- CONTAINER --- */
+        .container { padding: 20px 5%; max-width: 1200px; margin: 0 auto; }
+        .section-title { color: var(--primary-blue); font-size: 1.4rem; border-bottom: 2px solid var(--primary-blue); padding-bottom: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
+
+        /* --- DASHBOARD WIDGETS --- */
+        .dashboard-widgets { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .widget { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid var(--primary-blue); }
+        .widget h3 { margin: 0; font-size: 2rem; color: var(--primary-blue); }
+        .widget p { margin: 5px 0 0 0; font-size: 0.9rem; color: #666; font-weight: 600; text-transform: uppercase; }
+        .widget.w-warning { border-bottom-color: var(--warning); }
+        .widget.w-warning h3 { color: var(--warning); }
+        .widget.w-danger { border-bottom-color: var(--danger); }
+        .widget.w-danger h3 { color: var(--danger); }
+
+        /* --- ADD FORM --- */
+        .form-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 0.85rem; font-weight: 600; color: #555; }
+        .form-group input, .form-group select { padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-family: inherit; }
+        
+        .btn-main { border: none; padding: 10px 18px; border-radius: 4px; font-weight: 600; cursor: pointer; color: white; background: var(--primary-blue); transition: 0.2s; }
+        .btn-main:hover { filter: brightness(0.9); }
+        .btn-danger { background: var(--danger); padding: 6px 10px; font-size: 0.8rem; }
+
+        /* --- RESPONSIVE TABLE --- */
+        .table-responsive { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
+        th { background: var(--primary-blue); color: white; font-weight: 600; }
+        tr:hover { background-color: #f8fafc; }
+
+        /* Status Badges */
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+        .badge-active { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-expired { background: #fee2e2; color: #991b1b; }
+
+        /* BOTTOM BAR */
+        .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--secondary-blue); color: white; padding: 10px 20px; z-index: 1000; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;}
+        .bottom-bar a { color: white; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+        .bottom-bar a:hover { color: var(--warning); }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">Authorized Dealer E-Services Portal</div>
+
+    <header class="header-main">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Official_BPCL_LOGO.jpg" alt="BPCL Logo">
+        <div class="header-text">
+            <h1>BAHAR SERVICE STATION</h1>
+            <p>LICENSE & COMPLIANCE EXPIRY TRACKER</p>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <div class="dashboard-widgets">
+            <div class="widget">
+                <h3 id="count-total">0</h3>
+                <p>Total Licenses</p>
+            </div>
+            <div class="widget w-warning">
+                <h3 id="count-warning">0</h3>
+                <p>Expiring Soon (30 Days)</p>
+            </div>
+            <div class="widget w-danger">
+                <h3 id="count-expired">0</h3>
+                <p>Expired</p>
+            </div>
+        </div>
+
+        <div class="form-card no-print">
+            <h3 style="margin-top:0; color: var(--primary-blue); font-size: 1.1rem;"><i class="fa-solid fa-plus-circle"></i> Add / Renew License</h3>
+            <form id="licenseForm" class="form-grid" onsubmit="addLicense(event)">
+                
+                <div class="form-group">
+                    <label>License / Certificate Name</label>
+                    <input type="text" id="licName" placeholder="e.g. Legal Metrology Stamping" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Issuing Authority</label>
+                    <input type="text" id="licAuth" placeholder="e.g. Govt of West Bengal" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Expiry Date</label>
+                    <input type="date" id="licExpiry" required>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn-main"><i class="fa-solid fa-save"></i> Save Record</button>
+                </div>
+            </form>
+        </div>
+
+        <h2 class="section-title">Active Compliance Ledger</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>License / Certificate Name</th>
+                        <th>Issuing Authority</th>
+                        <th>Expiry Date</th>
+                        <th>Days Left</th>
+                        <th>Status</th>
+                        <th class="no-print">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="trackerBody">
+                    </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div class="bottom-bar no-print">
+        <a href="index.html"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+        <button class="btn-main" style="background: white; color: var(--secondary-blue); padding: 6px 15px;" onclick="window.print()"><i class="fa-solid fa-print"></i> Print Report</button>
+    </div>
+
+    <script>
+        // Use browser's local storage to save the licenses
+        const storageKey = 'BaharComplianceDB';
+        
+        function getLicenses() {
+            const data = localStorage.getItem(storageKey);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveLicenses(licenses) {
+            localStorage.setItem(storageKey, JSON.stringify(licenses));
+        }
+
+        // Format Date to DD-MMM-YYYY
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        // Calculate days left
+        function getDaysLeft(expiryDate) {
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const expiry = new Date(expiryDate);
+            const diffTime = expiry - today;
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        // Render Table and Dashboard Widgets
+        function renderTracker() {
+            const licenses = getLicenses();
+            const tbody = document.getElementById('trackerBody');
+            tbody.innerHTML = '';
+
+            let countWarning = 0;
+            let countExpired = 0;
+
+            // Sort licenses by days left (closest to expiring first)
+            licenses.sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
+
+            licenses.forEach((lic, index) => {
+                const daysLeft = getDaysLeft(lic.expiry);
+                let statusHtml = '';
+                let trStyle = '';
+
+                // Logic for Colors & Status
+                if (daysLeft < 0) {
+                    statusHtml = '<span class="badge badge-expired">Expired</span>';
+                    trStyle = 'background-color: #fef2f2;';
+                    countExpired++;
+                } else if (daysLeft <= 30) {
+                    statusHtml = '<span class="badge badge-warning">Expiring Soon</span>';
+                    trStyle = 'background-color: #fffbeb;';
+                    countWarning++;
+                } else {
+                    statusHtml = '<span class="badge badge-active">Active</span>';
+                }
+
+                const tr = document.createElement('tr');
+                tr.style.cssText = trStyle;
+                tr.innerHTML = `
+                    <td style="font-weight: 500;">${lic.name}</td>
+                    <td>${lic.authority}</td>
+                    <td style="font-weight: 600;">${formatDate(lic.expiry)}</td>
+                    <td style="font-weight: bold; color: ${daysLeft < 0 ? 'red' : 'inherit'};">${daysLeft < 0 ? 'Overdue by ' + Math.abs(daysLeft) : daysLeft}</td>
+                    <td>${statusHtml}</td>
+                    <td class="no-print"><button class="btn-main btn-danger" onclick="deleteLicense(${index})"><i class="fa-solid fa-trash"></i></button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // If empty
+            if(licenses.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#666;">No licenses tracked yet. Add one above!</td></tr>';
+            }
+
+            // Update Widgets
+            document.getElementById('count-total').innerText = licenses.length;
+            document.getElementById('count-warning').innerText = countWarning;
+            document.getElementById('count-expired').innerText = countExpired;
+        }
+
+        // Add new License
+        function addLicense(e) {
+            e.preventDefault();
+            const name = document.getElementById('licName').value.trim();
+            const auth = document.getElementById('licAuth').value.trim();
+            const expiry = document.getElementById('licExpiry').value;
+
+            if(!name || !auth || !expiry) return;
+
+            const licenses = getLicenses();
+            licenses.push({ name, authority: auth, expiry });
+            saveLicenses(licenses);
+            
+            document.getElementById('licenseForm').reset(); // Clear form
+            renderTracker(); // Refresh screen
+        }
+
+        // Delete License
+        function deleteLicense(index) {
+            if(confirm("Are you sure you want to remove this record?")) {
+                const licenses = getLicenses();
+                licenses.splice(index, 1);
+                saveLicenses(licenses);
+                renderTracker();
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', renderTracker);
+    </script>
+</body>
+</html>

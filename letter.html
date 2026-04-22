@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bahar Service Station - Letter Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #004b87; 
+            --bg-color: #cbd5e1; 
+            --text-main: #000000;
+            --bar-bg: #0f172a;
+        }
+
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: var(--bg-color); 
+            margin: 0; 
+            padding: 0 0 140px 0; 
+            color: var(--text-main); 
+        }
+
+        /* --- Strict A4 Page Simulation --- */
+        .page-container {
+            background: white;
+            width: 210mm; 
+            min-height: 297mm; 
+            margin: 40px auto; 
+            padding: 20mm 20mm 20mm 20mm;
+            box-sizing: border-box;
+            border-radius: 2px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            position: relative;
+            line-height: 1.6;
+        }
+
+        /* Letterhead Header */
+        .letterhead-header {
+            display: flex; align-items: center; justify-content: center; position: relative; 
+            padding-bottom: 15px; border-bottom: 3px solid var(--primary); margin-bottom: 25px;
+        }
+        .letterhead-header img { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 85px; height: auto; }
+        .header-text { text-align: center; width: 100%; padding: 0 95px; }
+        .header-text h1 { margin:0; color:var(--primary); font-size: 1.7rem; font-weight: 800; letter-spacing: 1px; }
+        .header-text p { margin:2px 0; font-size: 0.9rem; color: #334155; }
+        .header-text .dealer-title { font-weight: 700; font-size: 1.05rem; color: #000; margin-bottom: 5px; }
+
+        /* Professional Editable Fields */
+        .editable-field { 
+            border: 1px dashed transparent; 
+            padding: 4px; 
+            border-radius: 4px; 
+            outline: none; 
+            transition: 0.2s;
+            box-sizing: border-box;
+            min-height: 1.5em;
+        }
+        .editable-field:hover, .editable-field:focus { background: #f8fafc; border-color: #94a3b8; border-style: solid; }
+        .editable-field:empty:before { content: attr(data-placeholder); color: #94a3b8; font-style: italic; }
+
+        /* Letter Structure Formatting */
+        .letter-meta { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: 600; font-size: 0.95rem;}
+        .letter-to { margin-bottom: 20px; font-weight: 500; font-size: 0.95rem; }
+        .letter-subject { font-weight: 700; text-decoration: underline; margin-bottom: 20px; font-size: 0.95rem; text-align: center; }
+        .letter-salutation { font-weight: 600; margin-bottom: 10px; font-size: 0.95rem; }
+        .letter-body { text-align: justify; margin-bottom: 40px; font-size: 0.95rem; min-height: 200px; white-space: pre-wrap;}
+        .letter-signoff { text-align: right; font-size: 0.95rem; font-weight: 600; margin-top: 50px;}
+
+        /* Bottom Control Bar */
+        .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bar-bg); color: white; padding: 15px 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); z-index: 1000; box-sizing: border-box; }
+        .bar-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        
+        .template-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 8px;}
+        .template-controls input, .template-controls select { padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.85rem;}
+        
+        .actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .btn-main { border: none; padding: 9px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; color: white; font-family: inherit; font-size: 0.9rem; }
+        .btn-primary { background: #3b82f6; } .btn-secondary { background: #64748b; } .btn-save { background: #10b981; } .btn-danger { background: #ef4444; }
+        .btn-main:hover { filter: brightness(0.9); }
+
+        @media print {
+            @page { size: A4 portrait; margin: 0; }
+            html, body { background: white; margin: 0; padding: 0; }
+            .no-print { display: none !important; }
+            .page-container { width: 210mm; height: 297mm; box-shadow: none; border: none; padding: 15mm; margin: 0; border-radius: 0; }
+            .editable-field { border: none !important; padding: 0 !important; background: transparent !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container" id="printableLetter">
+        
+        <div class="letterhead-header">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Official_BPCL_LOGO.jpg" alt="BPCL">
+            <div class="header-text">
+                <h1>M/S. BAHAR SERVICE STATION</h1>
+                <p class="dealer-title">DEALER: BHARAT PETROLEUM CORP LTD.</p>
+                <p>VILL-DEVOKE, P.O.MAMUDPUR, P.S.SHIBDASPUR, DIST-N24 PARGANAS, PIN 743166, WB</p>
+                <p>CONTACT - 7018579966, 9088086294 | EMAIL - BAHARSERVICESTATION@GMAIL.COM</p>
+            </div>
+        </div>
+
+        <div class="letter-meta">
+            <div contenteditable="true" class="editable-field" id="field-ref" data-placeholder="Ref No: BSS/..." style="min-width: 200px;">Ref No: </div>
+            <div contenteditable="true" class="editable-field" id="field-date" data-placeholder="Date: DD/MM/YYYY" style="min-width: 150px; text-align: right;">Date: </div>
+        </div>
+
+        <div class="letter-to">
+            <div contenteditable="true" class="editable-field" id="field-to" data-placeholder="To Address...&#10;Line 2&#10;Line 3"><strong>To,</strong><br>[Designation]<br>[Organization Name]<br>[Address]</div>
+        </div>
+
+        <div class="letter-subject">
+            <div contenteditable="true" class="editable-field" id="field-subject" data-placeholder="Subject: Enter your subject here">Subject: </div>
+        </div>
+
+        <div class="letter-salutation">
+            <div contenteditable="true" class="editable-field" id="field-salutation" data-placeholder="Respected Sir/Madam,">Respected Sir/Madam,</div>
+        </div>
+
+        <div class="letter-body">
+            <div contenteditable="true" class="editable-field" id="field-body" data-placeholder="Start typing your formal letter here... Press Enter for new paragraphs.">With due respect, I beg to state that...</div>
+        </div>
+
+        <div class="letter-signoff">
+            <div contenteditable="true" class="editable-field" id="field-signoff" data-placeholder="Yours faithfully,&#10;&#10;&#10;M/S. Bahar Service Station">Yours faithfully,<br><br><br><br><strong>M/S. Bahar Service Station</strong></div>
+        </div>
+
+    </div>
+
+    <div class="bottom-bar no-print">
+        <div class="bar-content">
+            
+            <div class="template-controls">
+                <strong style="font-size: 0.9rem;">📚 Templates:</strong>
+                
+                <select id="templateSelector">
+                    <option value="">-- Select Saved Template --</option>
+                </select>
+                <button class="btn-main btn-primary" onclick="loadSelectedTemplate()">Load</button>
+                <button class="btn-main btn-danger" onclick="deleteSelectedTemplate()">Delete</button>
+
+                <div style="width: 2px; height: 30px; background: rgba(255,255,255,0.2); margin: 0 10px;"></div>
+                
+                <input type="text" id="newTemplateName" placeholder="Name this template..." autocomplete="off">
+                <button class="btn-main btn-save" onclick="saveCurrentTemplate()">💾 Save As Template</button>
+            </div>
+
+            <div class="actions">
+                <button class="btn-main btn-secondary" onclick="clearLetter()">🗑️ Clear Letter</button>
+                <button class="btn-main btn-primary" onclick="window.print()" style="font-size: 1.05rem; padding: 10px 25px;">🖨️ Print Letter</button>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        // Set today's date automatically if empty
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateField = document.getElementById('field-date');
+            if (dateField.innerText.trim() === "Date:") {
+                dateField.innerText = "Date: " + new Date().toLocaleDateString('en-IN');
+            }
+            refreshDropdown();
+        });
+
+        // --- TEMPLATE ENGINE LOGIC ---
+        const storageKey = 'BaharLetterTemplatesDB';
+
+        function getTemplates() {
+            const data = localStorage.getItem(storageKey);
+            return data ? JSON.parse(data) : {};
+        }
+
+        function refreshDropdown() {
+            const templates = getTemplates();
+            const selector = document.getElementById('templateSelector');
+            selector.innerHTML = '<option value="">-- Select Saved Template --</option>';
+            
+            for (const templateName in templates) {
+                const opt = document.createElement('option');
+                opt.value = templateName;
+                opt.innerText = templateName;
+                selector.appendChild(opt);
+            }
+        }
+
+        function saveCurrentTemplate() {
+            const nameInput = document.getElementById('newTemplateName').value.trim();
+            if (!nameInput) {
+                alert("Please enter a name for your template before saving.");
+                return;
+            }
+
+            // Gather all current fields
+            const letterData = {
+                ref: document.getElementById('field-ref').innerHTML,
+                date: document.getElementById('field-date').innerHTML,
+                to: document.getElementById('field-to').innerHTML,
+                subject: document.getElementById('field-subject').innerHTML,
+                salutation: document.getElementById('field-salutation').innerHTML,
+                body: document.getElementById('field-body').innerHTML,
+                signoff: document.getElementById('field-signoff').innerHTML
+            };
+
+            const templates = getTemplates();
+            templates[nameInput] = letterData;
+            localStorage.setItem(storageKey, JSON.stringify(templates));
+
+            document.getElementById('newTemplateName').value = ""; // Clear input
+            refreshDropdown();
+            alert(`Template "${nameInput}" saved successfully!`);
+        }
+
+        function loadSelectedTemplate() {
+            const selector = document.getElementById('templateSelector');
+            const selectedName = selector.value;
+            
+            if (!selectedName) {
+                alert("Please select a template from the dropdown to load.");
+                return;
+            }
+
+            const templates = getTemplates();
+            const data = templates[selectedName];
+
+            if (data) {
+                document.getElementById('field-ref').innerHTML = data.ref || "";
+                
+                // Keep today's date if the template date is old, or load template date
+                if(data.date && !data.date.includes("Date: ")) {
+                    document.getElementById('field-date').innerHTML = data.date;
+                } else {
+                    document.getElementById('field-date').innerText = "Date: " + new Date().toLocaleDateString('en-IN');
+                }
+
+                document.getElementById('field-to').innerHTML = data.to || "";
+                document.getElementById('field-subject').innerHTML = data.subject || "";
+                document.getElementById('field-salutation').innerHTML = data.salutation || "";
+                document.getElementById('field-body').innerHTML = data.body || "";
+                document.getElementById('field-signoff').innerHTML = data.signoff || "";
+            }
+        }
+
+        function deleteSelectedTemplate() {
+            const selector = document.getElementById('templateSelector');
+            const selectedName = selector.value;
+            
+            if (!selectedName) {
+                alert("Please select a template to delete.");
+                return;
+            }
+
+            if (confirm(`Are you sure you want to delete the template: "${selectedName}"?`)) {
+                const templates = getTemplates();
+                delete templates[selectedName];
+                localStorage.setItem(storageKey, JSON.stringify(templates));
+                refreshDropdown();
+            }
+        }
+
+        function clearLetter() {
+            if(confirm("Are you sure you want to clear the current letter?")) {
+                document.getElementById('field-ref').innerHTML = "Ref No: ";
+                document.getElementById('field-date').innerText = "Date: " + new Date().toLocaleDateString('en-IN');
+                document.getElementById('field-to').innerHTML = "<strong>To,</strong><br>";
+                document.getElementById('field-subject').innerHTML = "Subject: ";
+                document.getElementById('field-salutation').innerHTML = "Respected Sir/Madam,";
+                document.getElementById('field-body').innerHTML = "";
+                document.getElementById('field-signoff').innerHTML = "Yours faithfully,<br><br><br><br><strong>M/S. Bahar Service Station</strong>";
+            }
+        }
+    </script>
+</body>
+</html>
