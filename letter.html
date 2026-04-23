@@ -9,15 +9,29 @@
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/panel.css">
     
+    <script async defer src="https://apis.google.com/js/api.js"></script>
+    <script async defer src="https://accounts.google.com/gsi/client"></script>
+
     <style>
         /* Specific layout for the letter content inside the A4 document */
         .letter-meta { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: 600; font-size: 0.95rem;}
         .letter-body { text-align: justify; margin-bottom: 40px; font-size: 0.95rem; min-height: 200px; white-space: pre-wrap; line-height: 1.6;}
+
+        /* Secure Overlay (Lock Screen) */
+        #secureOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(248, 250, 252, 0.9); backdrop-filter: blur(8px); z-index: 50; display: flex; justify-content: center; align-items: flex-start; padding-top: 10vh; border-radius: 12px; }
+        .auth-card { background: white; padding: 40px 20px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; border-top: 4px solid var(--primary-blue); width: 90%; max-width: 400px; margin: 0 auto; }
+        .auth-card i { font-size: 3rem; color: var(--primary-blue); margin-bottom: 15px; }
+        .btn-ui { border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; color: white; font-family: inherit; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;}
+        .btn-primary { background: #3b82f6; }
     </style>
 </head>
 <body>
 
-    <div class="top-bar"><div>Authorized Dealer E-Services Portal</div><div>Strictly for Official Dealer Use</div></div>
+    <div class="top-bar">
+        <div><a href="index.html"><i class="fa-solid fa-arrow-left"></i> Home</a> | Authorized Dealer Portal</div>
+        <div><span id="sessionTimer" style="color: #60a5fa; font-weight: bold;"></span></div>
+    </div>
+
     <header class="header-main"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Official_BPCL_LOGO.jpg" alt="BPCL Logo">
         <div class="header-text"><h1>BAHAR SERVICE STATION</h1><p>LETTER GENERATOR MODULE</p></div>
     </header>
@@ -26,7 +40,19 @@
         <a href="letter-templates.html" class="active"><i class="fa-solid fa-folder-open"></i> Letter Templates</a>
     </nav>
 
-    <div class="app-workspace">
+    <div class="app-workspace" style="position: relative;">
+        
+        <div id="secureOverlay">
+            <div class="auth-card">
+                <i class="fa-solid fa-pen-nib"></i>
+                <h2 style="margin: 0 0 10px 0; color: #0f172a;">Editor Locked</h2>
+                <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 25px;">Please verify your identity to connect the editor to your cloud database.</p>
+                <button class="btn-ui btn-primary" style="width: 100%; font-size: 1.1rem; padding: 12px; justify-content: center;" onclick="handleAuthClick()">
+                    <i class="fa-brands fa-google"></i> Connect Google Drive
+                </button>
+            </div>
+        </div>
+
         <div class="a4-document" id="printableLetter">
             
             <div id="bahar-document-header">
@@ -52,67 +78,153 @@
     <script src="js/panel.js"></script>
 
     <script>
-        const storageKey = 'BaharLetterTemplatesDB';
-        let currentTemplateName = ""; // Keeps track if we are editing an existing template
+        // ==========================================
+        // 1. CREDENTIALS
+        // ==========================================
+        const CLIENT_ID = '440823822308-gasu0kbgb0ale7934isqfoiarvimpk7t.apps.googleusercontent.com';
+        const API_KEY = 'AIzaSyCagB4tL-k62EOcSSrUFceJBi0hhmF6Yeg';
+        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
-        document.addEventListener('DOMContentLoaded', () => {
-            // Set today's date safely
+        // ==========================================
+        // 2. CACHE MEMORY & CLOUD SETUP
+        // ==========================================
+        const TOKEN_KEY = 'BaharToken';
+        const EXPIRY_KEY = 'BaharExpiry';
+        const storageKey = 'BaharLetterTemplatesDB';
+        
+        let tokenClient;
+        let accessToken = null;
+        let templatesFolderId = null;
+        let dbFileId = null;
+        let currentTemplateName = ""; 
+
+        window.onload = function() {
+            gapi.load('client', initializeGapiClient);
+            
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                prompt: '', 
+                callback: (tokenResponse) => {
+                    accessToken = tokenResponse.access_token;
+                    localStorage.setItem(TOKEN_KEY, accessToken);
+                    localStorage.setItem(EXPIRY_KEY, Date.now() + (tokenResponse.expires_in * 1000));
+                    unlockEditor();
+                },
+            });
+        };
+
+        async function initializeGapiClient() {
+            await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] });
+            checkExistingSession(); 
+        }
+
+        function checkExistingSession() {
+            const savedToken = localStorage.getItem(TOKEN_KEY);
+            const expiry = localStorage.getItem(EXPIRY_KEY);
+
+            if (savedToken && expiry && Date.now() < parseInt(expiry)) {
+                accessToken = savedToken;
+                gapi.client.setToken({ access_token: accessToken });
+                unlockEditor();
+                startSessionTimer(expiry);
+            } else {
+                document.getElementById('secureOverlay').style.display = 'flex';
+            }
+        }
+
+        function handleAuthClick() { tokenClient.requestAccessToken(); }
+
+        function unlockEditor() {
+            document.getElementById('secureOverlay').style.display = 'none';
+            setupDriveFolders(); 
+            loadTemplateData();
+        }
+
+        function startSessionTimer(expiryTime) {
+            setInterval(() => {
+                let minutesLeft = Math.floor((expiryTime - Date.now()) / 60000);
+                if(minutesLeft <= 0) location.reload(); 
+                document.getElementById('sessionTimer').innerText = `Session Ends: ${minutesLeft}m`;
+            }, 60000);
+        }
+
+        // ==========================================
+        // 3. CLOUD DATABASE SYNC ENGINE
+        // ==========================================
+        async function setupDriveFolders() {
+            // Find the Letter Templates folder created by the Hub
+            let response = await gapi.client.drive.files.list({
+                q: `mimeType='application/vnd.google-apps.folder' and name='Bahar_Letter_Templates' and trashed=false`,
+                fields: 'files(id)'
+            });
+            if (response.result.files.length > 0) {
+                templatesFolderId = response.result.files[0].id;
+                await findDriveDB();
+            }
+        }
+
+        async function findDriveDB() {
+            let response = await gapi.client.drive.files.list({
+                q: `name='Templates_DB.json' and '${templatesFolderId}' in parents and trashed=false`,
+                fields: 'files(id)'
+            });
+            if (response.result.files.length > 0) {
+                dbFileId = response.result.files[0].id;
+            }
+        }
+
+        async function syncToDrive(templates) {
+            localStorage.setItem(storageKey, JSON.stringify(templates));
+            if(!dbFileId) return;
+
+            await fetch(`https://www.googleapis.com/upload/drive/v3/files/${dbFileId}?uploadType=media`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(templates)
+            });
+        }
+
+        // ==========================================
+        // 4. EDITOR LOGIC
+        // ==========================================
+        function loadTemplateData() {
             const dateField = document.getElementById('field-date');
             if (dateField && dateField.innerText.trim() === "Date:") {
                 dateField.innerText = "Date: " + new Date().toLocaleDateString('en-IN');
             }
 
-            // Check URL safely to see if we are loading a saved template
             try {
                 const urlParams = new URLSearchParams(window.location.search);
                 const templateToLoad = urlParams.get('template');
 
                 if (templateToLoad) {
                     currentTemplateName = templateToLoad; 
-
-                    const storedData = localStorage.getItem(storageKey);
-                    let templates = {};
-                    if (storedData) {
-                        templates = JSON.parse(storedData);
-                    }
-                    
+                    const templates = JSON.parse(localStorage.getItem(storageKey) || '{}');
                     const data = templates[templateToLoad];
                     
                     if (data) {
-                        const refField = document.getElementById('field-ref');
-                        if (refField) refField.innerHTML = data.ref || "";
-                        
-                        if(data.date && !data.date.includes("Date: ") && dateField) {
-                            dateField.innerHTML = data.date;
-                        }
-                        
-                        const toField = document.getElementById('field-to');
-                        if (toField) toField.innerHTML = data.to || "";
-                        
-                        const subField = document.getElementById('field-subject');
-                        if (subField) subField.innerHTML = data.subject || "";
-                        
-                        const salField = document.getElementById('field-salutation');
-                        if (salField) salField.innerHTML = data.salutation || "";
-                        
-                        const bodyField = document.getElementById('field-body');
-                        if (bodyField) bodyField.innerHTML = data.body || "";
-                        
-                        const signField = document.getElementById('field-signoff');
-                        if (signField) signField.innerHTML = data.signoff || "";
+                        if (document.getElementById('field-ref')) document.getElementById('field-ref').innerHTML = data.ref || "";
+                        if (data.date && !data.date.includes("Date: ") && dateField) dateField.innerHTML = data.date;
+                        if (document.getElementById('field-to')) document.getElementById('field-to').innerHTML = data.to || "";
+                        if (document.getElementById('field-subject')) document.getElementById('field-subject').innerHTML = data.subject || "";
+                        if (document.getElementById('field-salutation')) document.getElementById('field-salutation').innerHTML = data.salutation || "";
+                        if (document.getElementById('field-body')) document.getElementById('field-body').innerHTML = data.body || "";
+                        if (document.getElementById('field-signoff')) document.getElementById('field-signoff').innerHTML = data.signoff || "";
                     }
                 }
             } catch (error) {
                 console.error("Error loading template data:", error);
-                localStorage.removeItem(storageKey);
             }
-        });
+        }
 
-        // POPUP SAVE FUNCTION
-        function saveTemplate() {
+        // SYNCED SAVE FUNCTION (Replaces local-only save)
+        async function saveTemplate() {
             let inputName = prompt("Please enter a name for this template:", currentTemplateName);
-
-            // Cancelled
             if (inputName === null) return;
 
             const name = inputName.trim();
@@ -121,7 +233,8 @@
                 return;
             }
 
-            // Gather the data
+            document.body.style.cursor = 'wait'; // Visual indicator that it's syncing
+
             const letterData = {
                 ref: document.getElementById('field-ref') ? document.getElementById('field-ref').innerHTML : "",
                 date: document.getElementById('field-date') ? document.getElementById('field-date').innerHTML : "",
@@ -132,49 +245,36 @@
                 signoff: document.getElementById('field-signoff') ? document.getElementById('field-signoff').innerHTML : ""
             };
 
-            // Save to LocalStorage
             try {
                 let templates = JSON.parse(localStorage.getItem(storageKey) || '{}');
                 
-                // If renaming, delete the old key
                 if (currentTemplateName && currentTemplateName !== name && templates[currentTemplateName]) {
                     delete templates[currentTemplateName];
                 }
 
                 templates[name] = letterData;
-                localStorage.setItem(storageKey, JSON.stringify(templates));
                 
-                // Redirect back to Hub
+                // Push changes directly to Google Drive
+                await syncToDrive(templates);
+                
+                document.body.style.cursor = 'default';
                 window.location.href = 'letter-templates.html'; 
             } catch (error) {
                 console.error("Error saving template:", error);
-                alert("Could not save template. Your browser data might be corrupted.");
+                alert("Could not sync template to the cloud. Please try again.");
+                document.body.style.cursor = 'default';
             }
         }
 
-        // Clear Function
         function clearLetter() {
             if(confirm("Are you sure you want to clear the current letter editor?")) {
-                const refField = document.getElementById('field-ref');
-                if (refField) refField.innerHTML = "Ref No: ";
-                
-                const dateField = document.getElementById('field-date');
-                if (dateField) dateField.innerText = "Date: " + new Date().toLocaleDateString('en-IN');
-                
-                const toField = document.getElementById('field-to');
-                if (toField) toField.innerHTML = "<strong>To,</strong><br>";
-                
-                const subField = document.getElementById('field-subject');
-                if (subField) subField.innerHTML = "Subject: ";
-                
-                const salField = document.getElementById('field-salutation');
-                if (salField) salField.innerHTML = "Respected Sir/Madam,";
-                
-                const bodyField = document.getElementById('field-body');
-                if (bodyField) bodyField.innerHTML = "";
-                
-                const signField = document.getElementById('field-signoff');
-                if (signField) signField.innerHTML = "Yours faithfully,<br><br><br><br><strong>M/S. Bahar Service Station</strong>";
+                if (document.getElementById('field-ref')) document.getElementById('field-ref').innerHTML = "Ref No: ";
+                if (document.getElementById('field-date')) document.getElementById('field-date').innerText = "Date: " + new Date().toLocaleDateString('en-IN');
+                if (document.getElementById('field-to')) document.getElementById('field-to').innerHTML = "<strong>To,</strong><br>";
+                if (document.getElementById('field-subject')) document.getElementById('field-subject').innerHTML = "Subject: ";
+                if (document.getElementById('field-salutation')) document.getElementById('field-salutation').innerHTML = "Respected Sir/Madam,";
+                if (document.getElementById('field-body')) document.getElementById('field-body').innerHTML = "";
+                if (document.getElementById('field-signoff')) document.getElementById('field-signoff').innerHTML = "Yours faithfully,<br><br><br><br><strong>M/S. Bahar Service Station</strong>";
             }
         }
     </script>
