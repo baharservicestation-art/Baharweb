@@ -1,0 +1,41 @@
+/* =========================================
+   UNIFIED BOTTOM CONTROL PANEL
+   ========================================= */
+.control-panel {
+    position: fixed; bottom: 0; left: 0; width: 100%; 
+    background: #0f172a; color: white; 
+    padding: 15px 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.2); 
+    z-index: 1000; box-sizing: border-box;
+    border-top: 3px solid #f1c40f; /* Accent Yellow */
+}
+
+.control-panel-inner {
+    max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+}
+
+.panel-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.panel-branding { font-size: 1rem; font-weight: 700; color: #cbd5e1; display: flex; align-items: center; gap: 8px;}
+
+/* Modern Button Styling */
+.btn-ui {
+    border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; color: white; 
+    font-family: 'Roboto', sans-serif; font-size: 0.9rem; transition: all 0.2s ease;
+    display: flex; align-items: center; gap: 8px;
+}
+.btn-ui:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.btn-ui:active { transform: translateY(0); }
+
+.btn-primary { background: #3b82f6; } 
+.btn-success { background: #10b981; } 
+.btn-danger { background: #ef4444; }
+.btn-secondary { background: #475569; }
+
+/* Tool Inputs (Dropdowns/Text fields in panel) */
+.panel-input {
+    padding: 8px 12px; border-radius: 6px; border: 1px solid #475569; background: #1e293b; color: white; font-family: inherit; font-size: 0.85rem; outline: none;
+}
+.panel-input:focus { border-color: #3b82f6; }
+
+@media print {
+    .control-panel { display: none !important; }
+}

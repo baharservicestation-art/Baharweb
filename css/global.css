@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Poppins:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --primary-blue: #004b87; 
+    --secondary-blue: #003366;
+    --accent-yellow: #f1c40f;
+    --bg-light: #f4f7f6;
+    --text-dark: #333333;
+    --border-color: #dee2e6;
+    --danger: #ef4444;
+    --success: #10b981;
+    --panel-bg: #0f172a;
+}
+
+/* =========================================
+   1. GLOBAL RESETS & TYPOGRAPHY
+   ========================================= */
+body {
+    margin: 0; padding: 0; 
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--bg-light); 
+    color: var(--text-dark);
+}
+
+/* =========================================
+   2. UNIFIED HEADER & NAVIGATION
+   ========================================= */
+.top-bar {
+    background-color: var(--text-dark); color: white; font-size: 0.8rem;
+    padding: 5px 5%; display: flex; justify-content: space-between; flex-wrap: wrap; text-align: center;
+}
+
+.header-main {
+    background: white; padding: 15px 5%; display: flex; align-items: center; gap: 20px;
+    border-bottom: 3px solid var(--accent-yellow); flex-wrap: wrap; justify-content: center;
+}
+.header-main img { height: 60px; }
+.header-text { text-align: center; }
+@media (min-width: 600px) { .header-text { text-align: left; } .header-main { justify-content: flex-start; } }
+
+.header-text h1 { margin: 0; color: var(--primary-blue); font-size: clamp(1.2rem, 3vw, 1.6rem); font-weight: 900; letter-spacing: 0.5px; }
+.header-text p { margin: 2px 0 0 0; font-size: 0.85rem; font-weight: 700; color: #555; }
+
+.nav-ribbon {
+    background-color: var(--primary-blue); padding: 0 5%; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+}
+.nav-ribbon a {
+    color: white; text-decoration: none; padding: 12px 15px; font-size: 0.9rem; font-weight: 500; transition: 0.2s; white-space: nowrap;
+}
+.nav-ribbon a:hover, .nav-ribbon a.active { background-color: var(--secondary-blue); border-bottom: 3px solid var(--accent-yellow); }
+@media (min-width: 600px) { .nav-ribbon { justify-content: flex-start; gap: 20px; } }
+
+/* =========================================
+   3. A4 DOCUMENT CONTAINERS (For Tools)
+   ========================================= */
+.app-workspace {
+    padding: 40px 20px 140px 20px; /* Extra bottom padding for the fixed bar */
+}
+
+.a4-document {
+    font-family: 'Poppins', sans-serif; /* Poppins looks better for print docs */
+    background: white;
+    width: 210mm; 
+    min-height: 297mm; 
+    margin: 0 auto; 
+    padding: 20mm;
+    box-sizing: border-box;
+    border-radius: 4px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    position: relative;
+    color: black;
+}
+
+/* =========================================
+   4. EDITABLE FIELDS
+   ========================================= */
+.editable-field { 
+    border: 1px dashed transparent; padding: 4px; border-radius: 4px; outline: none; transition: 0.2s; box-sizing: border-box;
+}
+.editable-field:hover, .editable-field:focus { background: #f8fafc; border-color: #94a3b8; border-style: solid; }
+.editable-field:empty:before { content: attr(data-placeholder); color: #94a3b8; font-style: italic; }
+
+/* =========================================
+   5. UNIFIED BOTTOM CONTROL PANEL
+   ========================================= */
+.control-panel {
+    position: fixed; bottom: 0; left: 0; width: 100%; 
+    background: var(--panel-bg); color: white; 
+    padding: 15px 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.2); 
+    z-index: 1000; box-sizing: border-box;
+    border-top: 3px solid var(--accent-yellow);
+}
+
+.control-panel-inner {
+    max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+}
+
+.panel-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.panel-branding { font-size: 1rem; font-weight: 700; color: #cbd5e1; }
+
+/* Modern Button Styling */
+.btn-ui {
+    border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; color: white; 
+    font-family: 'Roboto', sans-serif; font-size: 0.9rem; transition: all 0.2s ease;
+    display: flex; align-items: center; gap: 8px;
+}
+.btn-ui:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.btn-ui:active { transform: translateY(0); }
+
+.btn-primary { background: #3b82f6; } 
+.btn-success { background: var(--success); } 
+.btn-danger { background: var(--danger); }
+.btn-secondary { background: #475569; }
+
+/* Tool Inputs (Dropdowns/Text fields in panel) */
+.panel-input {
+    padding: 8px 12px; border-radius: 6px; border: 1px solid #475569; background: #1e293b; color: white; font-family: inherit; font-size: 0.85rem; outline: none;
+}
+.panel-input:focus { border-color: #3b82f6; }
+
+/* =========================================
+   6. GLOBAL PRINT RULES
+   ========================================= */
+@media print {
+    @page { size: A4 portrait; margin: 0; }
+    html, body { background: white; margin: 0; padding: 0; }
+    .no-print, .top-bar, .header-main, .nav-ribbon, .control-panel { display: none !important; }
+    .app-workspace { padding: 0 !important; }
+    .a4-document { width: 210mm; height: auto; box-shadow: none; border: none; padding: 15mm; margin: 0; border-radius: 0; }
+    .editable-field { border: none !important; padding: 0 !important; background: transparent !important; }
+}
