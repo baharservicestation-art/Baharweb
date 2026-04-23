@@ -4,8 +4,8 @@
     --primary-blue: #004b87; 
     --secondary-blue: #003366;
     --accent-yellow: #f1c40f;
-    --bg-light: #f4f7f6;
-    --text-dark: #333333;
+    --bg-light: #f8fafc;
+    --text-dark: #0f172a;
     --border-color: #dee2e6;
     --danger: #ef4444;
     --success: #10b981;
@@ -17,7 +17,7 @@
    ========================================= */
 body {
     margin: 0; padding: 0; 
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Poppins', sans-serif;
     background-color: var(--bg-light); 
     color: var(--text-dark);
 }
@@ -26,49 +26,49 @@ body {
    2. UNIFIED HEADER & NAVIGATION
    ========================================= */
 .top-bar {
-    background-color: var(--text-dark); color: white; font-size: 0.8rem;
-    padding: 5px 5%; display: flex; justify-content: space-between; flex-wrap: wrap; text-align: center;
+    background-color: var(--text-dark); color: #cbd5e1; font-size: 0.85rem;
+    padding: 8px 5%; display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center;
 }
+.top-bar a { color: #cbd5e1; text-decoration: none; font-weight: bold; }
 
 .header-main {
     background: white; padding: 15px 5%; display: flex; align-items: center; gap: 20px;
-    border-bottom: 3px solid var(--accent-yellow); flex-wrap: wrap; justify-content: center;
+    border-bottom: 3px solid var(--primary-blue); flex-wrap: wrap; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
-.header-main img { height: 60px; }
-.header-text { text-align: center; }
-@media (min-width: 600px) { .header-text { text-align: left; } .header-main { justify-content: flex-start; } }
-
-.header-text h1 { margin: 0; color: var(--primary-blue); font-size: clamp(1.2rem, 3vw, 1.6rem); font-weight: 900; letter-spacing: 0.5px; }
-.header-text p { margin: 2px 0 0 0; font-size: 0.85rem; font-weight: 700; color: #555; }
+.header-main img { height: 60px; object-fit: contain; }
+.header-text h1 { margin: 0; color: var(--primary-blue); font-size: clamp(1.2rem, 3vw, 1.5rem); font-weight: 800; letter-spacing: 0.5px; }
+.header-text p { margin: 2px 0 0 0; font-size: 0.85rem; font-weight: 700; color: #64748b; }
 
 .nav-ribbon {
-    background-color: var(--primary-blue); padding: 0 5%; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    background-color: #f8fafc; padding: 0 5%; display: flex; gap: 10px; flex-wrap: wrap;
+    border-bottom: 1px solid #e2e8f0; overflow-x: auto; white-space: nowrap;
 }
 .nav-ribbon a {
-    color: white; text-decoration: none; padding: 12px 15px; font-size: 0.9rem; font-weight: 500; transition: 0.2s; white-space: nowrap;
+    color: #64748b; text-decoration: none; padding: 12px 15px; font-size: 0.95rem; font-weight: 600; transition: 0.2s;
+    border-bottom: 3px solid transparent;
 }
-.nav-ribbon a:hover, .nav-ribbon a.active { background-color: var(--secondary-blue); border-bottom: 3px solid var(--accent-yellow); }
-@media (min-width: 600px) { .nav-ribbon { justify-content: flex-start; gap: 20px; } }
+.nav-ribbon a:hover, .nav-ribbon a.active { color: var(--primary-blue); border-bottom-color: var(--primary-blue); }
 
 /* =========================================
    3. A4 DOCUMENT CONTAINERS (For Tools)
    ========================================= */
 .app-workspace {
-    padding: 40px 20px 140px 20px; /* Extra bottom padding for the fixed bar */
+    padding: 40px 5% 140px 5%; /* Flexible padding */
+    display: flex; justify-content: center;
 }
 
-.a4-document {
-    font-family: 'Poppins', sans-serif; /* Poppins looks better for print docs */
+.a4-document, .invoice-container {
     background: white;
-    width: 210mm; 
+    width: 210mm; /* Standard A4 width */
+    max-width: 100%; /* Prevents overflow on smaller screens */
     min-height: 297mm; 
-    margin: 0 auto; 
     padding: 20mm;
     box-sizing: border-box;
-    border-radius: 4px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
     position: relative;
     color: black;
+    overflow-x: auto; /* Allows inner tables to scroll */
 }
 
 /* =========================================
@@ -77,55 +77,69 @@ body {
 .editable-field { 
     border: 1px dashed transparent; padding: 4px; border-radius: 4px; outline: none; transition: 0.2s; box-sizing: border-box;
 }
-.editable-field:hover, .editable-field:focus { background: #f8fafc; border-color: #94a3b8; border-style: solid; }
+.editable-field:hover, .editable-field:focus { background: #f1f5f9; border-color: #94a3b8; border-style: dashed; }
 .editable-field:empty:before { content: attr(data-placeholder); color: #94a3b8; font-style: italic; }
 
 /* =========================================
-   5. UNIFIED BOTTOM CONTROL PANEL
-   ========================================= */
-.control-panel {
-    position: fixed; bottom: 0; left: 0; width: 100%; 
-    background: var(--panel-bg); color: white; 
-    padding: 15px 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.2); 
-    z-index: 1000; box-sizing: border-box;
-    border-top: 3px solid var(--accent-yellow);
-}
-
-.control-panel-inner {
-    max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
-}
-
-.panel-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.panel-branding { font-size: 1rem; font-weight: 700; color: #cbd5e1; }
-
-/* Modern Button Styling */
-.btn-ui {
-    border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; color: white; 
-    font-family: 'Roboto', sans-serif; font-size: 0.9rem; transition: all 0.2s ease;
-    display: flex; align-items: center; gap: 8px;
-}
-.btn-ui:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-.btn-ui:active { transform: translateY(0); }
-
-.btn-primary { background: #3b82f6; } 
-.btn-success { background: var(--success); } 
-.btn-danger { background: var(--danger); }
-.btn-secondary { background: #475569; }
-
-/* Tool Inputs (Dropdowns/Text fields in panel) */
-.panel-input {
-    padding: 8px 12px; border-radius: 6px; border: 1px solid #475569; background: #1e293b; color: white; font-family: inherit; font-size: 0.85rem; outline: none;
-}
-.panel-input:focus { border-color: #3b82f6; }
-
-/* =========================================
-   6. GLOBAL PRINT RULES
+   5. GLOBAL PRINT RULES
    ========================================= */
 @media print {
-    @page { size: A4 portrait; margin: 0; }
+    @page { size: A4 portrait; margin: 10mm; }
     html, body { background: white; margin: 0; padding: 0; }
-    .no-print, .top-bar, .header-main, .nav-ribbon, .control-panel { display: none !important; }
+    .no-print, .top-bar, .header-main, .nav-ribbon, .control-panel, #secureOverlay { display: none !important; }
     .app-workspace { padding: 0 !important; }
-    .a4-document { width: 210mm; height: auto; box-shadow: none; border: none; padding: 15mm; margin: 0; border-radius: 0; }
+    .a4-document, .invoice-container { width: 100% !important; max-width: none !important; min-height: auto; box-shadow: none; border: none; padding: 0; margin: 0; }
     .editable-field { border: none !important; padding: 0 !important; background: transparent !important; }
+}
+
+/* =========================================
+   6. MOBILE RESPONSIVE ENGINE (Fixes all pages)
+   ========================================= */
+@media screen and (max-width: 768px) {
+    /* Header & Navigation */
+    .top-bar { flex-direction: column; text-align: center; gap: 8px; justify-content: center;}
+    .header-main { flex-direction: column; text-align: center; padding: 15px; }
+    .header-text { width: 100%; }
+    
+    /* Document Containers */
+    .app-workspace { padding: 20px 3% 180px 3%; }
+    .a4-document, .invoice-container { 
+        width: 100%; min-height: auto; padding: 15px; border-radius: 6px;
+    }
+
+    /* Modals */
+    .modal-overlay { padding: 10px; align-items: flex-end; } 
+    .modal-content { max-height: 85vh; border-radius: 15px 15px 5px 5px; max-width: 100%; }
+    .modal-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .modal-header > div { width: 100%; justify-content: space-between; }
+    .preview-paper { width: 100%; padding: 15px; min-height: auto; }
+
+    /* Vault Tracker Table -> Mobile Cards */
+    .table-card { background: transparent !important; box-shadow: none !important; padding: 0 !important; }
+    .table-card table, .table-card tbody, .table-card tr, .table-card td { display: block; width: 100%; box-sizing: border-box; }
+    .table-card thead { display: none; }
+    
+    .table-card tr {
+        margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 10px;
+        background: #fff; padding: 5px 15px 15px 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .table-card td {
+        display: flex; justify-content: space-between; align-items: center;
+        text-align: right; padding: 10px 0 !important; border-bottom: 1px solid #f1f5f9 !important;
+    }
+    
+    /* Inject Header Text for Tracker Table */
+    .table-card td:nth-child(1)::before { content: "Document Name"; font-weight: 600; color: #64748b; font-size: 0.85rem; }
+    .table-card td:nth-child(2)::before { content: "Attachment"; font-weight: 600; color: #64748b; font-size: 0.85rem; }
+    .table-card td:nth-child(3)::before { content: "Expiry Date"; font-weight: 600; color: #64748b; font-size: 0.85rem; }
+    .table-card td:nth-child(4)::before { content: "Status"; font-weight: 600; color: #64748b; font-size: 0.85rem; }
+    
+    .table-card td:nth-child(1) { font-size: 1.05rem; color: var(--primary-blue); font-weight: bold; border-bottom: 2px solid #e2e8f0 !important; padding-top: 15px !important; flex-direction: column; align-items: flex-start; gap: 5px;}
+    .table-card td:nth-child(1)::before { display: none; }
+
+    /* Fix Buttons Row in Tracker */
+    .table-card td:nth-child(5) { border-bottom: none !important; padding-top: 15px !important; display: block; }
+    .table-card td:nth-child(5)::before { display: none; }
+    .action-buttons { display: flex; width: 100%; gap: 10px; justify-content: space-between; }
+    .action-buttons .btn-small { flex: 1; padding: 10px; font-size: 1rem; display: flex; justify-content: center; }
 }
