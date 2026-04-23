@@ -2,271 +2,628 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compliance Tracker - Bahar Service Station</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Document Vault - Bahar Service Station</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <script async defer src="https://apis.google.com/js/api.js"></script>
+    <script async defer src="https://accounts.google.com/gsi/client"></script>
+
     <style>
-        :root {
-            --primary-blue: #004b87; 
-            --secondary-blue: #003366;
-            --bg-light: #f4f7f6;
-            --text-dark: #333333;
-            --border-color: #dee2e6;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-        }
-
-        body {
-            margin: 0; padding: 0 0 80px 0; font-family: 'Roboto', sans-serif;
-            background-color: var(--bg-light); color: var(--text-dark);
-        }
-
-        /* --- HEADER --- */
-        .top-bar { background-color: var(--text-dark); color: white; font-size: 0.8rem; padding: 5px 5%; text-align: center; }
-        .header-main { background: white; padding: 15px 5%; display: flex; align-items: center; gap: 15px; border-bottom: 3px solid var(--warning); flex-wrap: wrap; justify-content: center; }
-        .header-main img { height: 60px; }
-        .header-text { text-align: center; }
-        @media (min-width: 600px) { .header-text { text-align: left; } .header-main { justify-content: flex-start; } }
-        .header-text h1 { margin: 0; color: var(--primary-blue); font-size: clamp(1.2rem, 3vw, 1.6rem); font-weight: 900; }
-        .header-text p { margin: 2px 0 0 0; font-size: 0.85rem; font-weight: 700; color: #555; }
-
-        /* --- CONTAINER --- */
-        .container { padding: 20px 5%; max-width: 1200px; margin: 0 auto; }
-        .section-title { color: var(--primary-blue); font-size: 1.4rem; border-bottom: 2px solid var(--primary-blue); padding-bottom: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
-
-        /* --- DASHBOARD WIDGETS --- */
-        .dashboard-widgets { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .widget { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid var(--primary-blue); }
-        .widget h3 { margin: 0; font-size: 2rem; color: var(--primary-blue); }
-        .widget p { margin: 5px 0 0 0; font-size: 0.9rem; color: #666; font-weight: 600; text-transform: uppercase; }
-        .widget.w-warning { border-bottom-color: var(--warning); }
-        .widget.w-warning h3 { color: var(--warning); }
-        .widget.w-danger { border-bottom-color: var(--danger); }
-        .widget.w-danger h3 { color: var(--danger); }
-
-        /* --- ADD FORM --- */
-        .form-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end; }
-        .form-group { display: flex; flex-direction: column; gap: 5px; }
-        .form-group label { font-size: 0.85rem; font-weight: 600; color: #555; }
-        .form-group input, .form-group select { padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-family: inherit; }
+        :root { --primary-blue: #1e3a8a; --bg-color: #f8fafc; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); margin: 0; color: #334155; }
         
-        .btn-main { border: none; padding: 10px 18px; border-radius: 4px; font-weight: 600; cursor: pointer; color: white; background: var(--primary-blue); transition: 0.2s; }
-        .btn-main:hover { filter: brightness(0.9); }
-        .btn-danger { background: var(--danger); padding: 6px 10px; font-size: 0.8rem; }
+        /* Headers & Top Bar */
+        .top-bar { background: #0f172a; color: #94a3b8; padding: 10px 5%; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;}
+        .top-bar a { color: #cbd5e1; text-decoration: none; }
+        .header-main { background: white; padding: 15px 5%; display: flex; align-items: center; gap: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .header-main img { height: 60px; object-fit: contain;}
+        .header-text h1 { margin: 0; font-size: 1.4rem; color: var(--primary-blue); }
+        .header-text p { margin: 0; font-size: 0.85rem; font-weight: 600; color: #64748b; }
 
-        /* --- RESPONSIVE TABLE --- */
-        .table-responsive { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .container { padding: 20px 5%; max-width: 1400px; margin: 0 auto; position: relative; }
+        
+        /* UI Buttons */
+        .btn-ui { border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; color: white; font-family: inherit; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;}
+        .btn-ui:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        .btn-ui:disabled { background: #cbd5e1 !important; cursor: not-allowed; transform: none; }
+        .btn-primary { background: #3b82f6; }
+        .btn-success { background: #10b981; }
+        .btn-warning { background: #f59e0b; }
+        .btn-danger { background: #ef4444; }
+        .btn-small { padding: 6px 12px; font-size: 0.85rem; }
+
+        /* Secure Overlay (Lock Screen) */
+        #secureOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(248, 250, 252, 0.9); backdrop-filter: blur(8px); z-index: 50; display: flex; justify-content: center; align-items: flex-start; padding-top: 10vh; border-radius: 12px; }
+        .auth-card { background: white; padding: 40px 20px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; border-top: 4px solid var(--primary-blue); width: 90%; max-width: 400px; }
+        .auth-card i { font-size: 3rem; color: var(--primary-blue); margin-bottom: 15px; }
+        
+        /* Live Stats Dashboard */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 15px; border-left: 5px solid #cbd5e1; }
+        .stat-active { border-left-color: #3b82f6; }
+        .stat-expiring { border-left-color: #f59e0b; }
+        .stat-expired { border-left-color: #ef4444; }
+        .stat-icon { font-size: 2rem; color: #94a3b8; }
+        .stat-data h4 { margin: 0; font-size: 0.85rem; color: #64748b; text-transform: uppercase; }
+        .stat-data span { font-size: 1.8rem; font-weight: 700; color: #0f172a; }
+
+        /* Controls: Search & Tabs */
+        .controls-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; border-bottom: 2px solid #cbd5e1; padding-bottom: 15px;}
+        .search-box { position: relative; flex-grow: 1; max-width: 350px; }
+        .search-box input { width: 100%; padding: 10px 15px 10px 35px; border: 1px solid #cbd5e1; border-radius: 20px; font-family: inherit; font-size: 0.95rem; outline: none; box-sizing: border-box; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        
+        .tabs { display: flex; gap: 10px; overflow-x: auto; white-space: nowrap; padding-bottom: 5px;}
+        .tab-btn { background: none; border: none; padding: 5px 15px; font-size: 1rem; font-weight: 600; color: #64748b; cursor: pointer; font-family: inherit; }
+        .tab-btn.active { color: var(--primary-blue); border-bottom: 3px solid var(--primary-blue); }
+
+        /* Table */
+        .table-card { background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; margin-bottom: 30px; -webkit-overflow-scrolling: touch;}
         table { width: 100%; border-collapse: collapse; min-width: 700px; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
-        th { background: var(--primary-blue); color: white; font-weight: 600; }
-        tr:hover { background-color: #f8fafc; }
-
-        /* Status Badges */
-        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem; }
+        th { background: #f8fafc; color: #334155; font-weight: 700; text-transform: uppercase; font-size: 0.85rem; white-space: nowrap;}
+        tr:hover { background-color: #f1f5f9; }
+        
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; white-space: nowrap;}
         .badge-active { background: #d1fae5; color: #065f46; }
-        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-expiring { background: #fef3c7; color: #92400e; }
         .badge-expired { background: #fee2e2; color: #991b1b; }
+        .badge-inactive { background: #e2e8f0; color: #475569; }
 
-        /* BOTTOM BAR */
-        .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--secondary-blue); color: white; padding: 10px 20px; z-index: 1000; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;}
-        .bottom-bar a { color: white; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
-        .bottom-bar a:hover { color: var(--warning); }
+        .file-indicator { cursor: pointer; color: #3b82f6; font-size: 0.85rem; font-weight: 600; white-space: nowrap;}
+        .file-indicator:hover { text-decoration: underline; }
+
+        /* Modals */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; backdrop-filter: blur(3px);}
+        .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;}
+        .modal-header { padding: 15px 20px; background: #0f172a; color: white; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;}
+        .modal-header h3 { margin: 0; font-size: 1.1rem; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1;}
+        .modal-body { padding: 20px; overflow-y: auto;}
+        
+        /* Iframe Viewer Specifics */
+        .viewer-content { max-width: 1000px; height: 85vh; }
+        .viewer-body { padding: 0; flex-grow: 1; display: flex; flex-direction: column; }
+        iframe { width: 100%; height: 100%; border: none; flex-grow: 1; background: #f1f5f9;}
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: #334155; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 0.95rem; box-sizing: border-box;}
+
+        /* Mobile View Adjustments */
+        @media (max-width: 768px) {
+            .header-main { flex-direction: column; text-align: center; padding: 15px; }
+            .controls-row { flex-direction: column; align-items: stretch; }
+            .search-box { max-width: 100%; width: 100%; }
+            .controls-row > div:last-child { flex-direction: column; width: 100%; }
+            .controls-row > div:last-child .btn-ui { width: 100%; }
+            
+            .modal-overlay { padding: 0; }
+            .modal-content { max-width: 100%; height: 100%; max-height: 100vh; border-radius: 0; }
+            .viewer-content { height: 100vh; }
+            
+            .top-bar { flex-direction: column; text-align: center; justify-content: center;}
+            
+            /* Smaller action buttons in table for mobile */
+            .action-buttons { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end;}
+            .btn-small { padding: 6px 10px; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">Authorized Dealer E-Services Portal</div>
-
+    <div class="top-bar">
+        <div><a href="index.html"><i class="fa-solid fa-arrow-left"></i> Home</a> | Authorized Dealer Portal</div>
+        <div><span id="sessionTimer" style="color: #60a5fa; font-weight: bold;"></span></div>
+    </div>
+    
     <header class="header-main">
         <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Official_BPCL_LOGO.jpg" alt="BPCL Logo">
         <div class="header-text">
             <h1>BAHAR SERVICE STATION</h1>
-            <p>LICENSE & COMPLIANCE EXPIRY TRACKER</p>
+            <p>COMPLIANCE & DOCUMENT VAULT</p>
         </div>
     </header>
 
     <div class="container">
         
-        <div class="dashboard-widgets">
-            <div class="widget">
-                <h3 id="count-total">0</h3>
-                <p>Total Licenses</p>
-            </div>
-            <div class="widget w-warning">
-                <h3 id="count-warning">0</h3>
-                <p>Expiring Soon (30 Days)</p>
-            </div>
-            <div class="widget w-danger">
-                <h3 id="count-expired">0</h3>
-                <p>Expired</p>
+        <div id="secureOverlay">
+            <div class="auth-card">
+                <i class="fa-solid fa-shield-halved"></i>
+                <h2 style="margin: 0 0 10px 0; color: #0f172a;">Vault Locked</h2>
+                <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 25px;">Please verify your identity to access live compliance documents. Session lasts for 1 hour.</p>
+                <button class="btn-ui btn-primary" style="width: 100%; font-size: 1.1rem; padding: 12px;" onclick="handleAuthClick()">
+                    <i class="fa-brands fa-google"></i> Connect Google Drive
+                </button>
             </div>
         </div>
 
-        <div class="form-card no-print">
-            <h3 style="margin-top:0; color: var(--primary-blue); font-size: 1.1rem;"><i class="fa-solid fa-plus-circle"></i> Add / Renew License</h3>
-            <form id="licenseForm" class="form-grid" onsubmit="addLicense(event)">
-                
-                <div class="form-group">
-                    <label>License / Certificate Name</label>
-                    <input type="text" id="licName" placeholder="e.g. Legal Metrology Stamping" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Issuing Authority</label>
-                    <input type="text" id="licAuth" placeholder="e.g. Govt of West Bengal" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Expiry Date</label>
-                    <input type="date" id="licExpiry" required>
-                </div>
-
-                <div class="form-group">
-                    <button type="submit" class="btn-main"><i class="fa-solid fa-save"></i> Save Record</button>
-                </div>
-            </form>
+        <div class="dashboard-grid">
+            <div class="stat-card stat-active">
+                <i class="fa-solid fa-file-circle-check stat-icon"></i>
+                <div class="stat-data"><h4>Active / Valid</h4><span id="statActive">0</span></div>
+            </div>
+            <div class="stat-card stat-expiring">
+                <i class="fa-solid fa-clock-rotate-left stat-icon" style="color: #f59e0b;"></i>
+                <div class="stat-data"><h4>Expiring (30 Days)</h4><span id="statExpiring">0</span></div>
+            </div>
+            <div class="stat-card stat-expired">
+                <i class="fa-solid fa-triangle-exclamation stat-icon" style="color: #ef4444;"></i>
+                <div class="stat-data"><h4>Expired Action Required</h4><span id="statExpired">0</span></div>
+            </div>
         </div>
 
-        <h2 class="section-title">Active Compliance Ledger</h2>
-        <div class="table-responsive">
+        <div class="controls-row">
+            <div class="tabs">
+                <button class="tab-btn active" id="tab-active" onclick="switchTab('active')">Live Vault</button>
+                <button class="tab-btn" id="tab-inactive" onclick="switchTab('inactive')">Archive</button>
+            </div>
+            
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchInput" placeholder="Search documents..." onkeyup="renderVault()">
+                </div>
+                <button class="btn-ui btn-primary" id="uploadBtn" onclick="openDocModal()" disabled><i class="fa-solid fa-plus"></i> Add Record</button>
+            </div>
+        </div>
+
+        <div class="table-card">
             <table>
                 <thead>
                     <tr>
-                        <th>License / Certificate Name</th>
-                        <th>Issuing Authority</th>
+                        <th>License Name</th>
+                        <th>File</th>
                         <th>Expiry Date</th>
-                        <th>Days Left</th>
                         <th>Status</th>
-                        <th class="no-print">Action</th>
+                        <th style="text-align: right;">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="trackerBody">
+                <tbody id="vaultTableBody">
                     </tbody>
             </table>
         </div>
-
     </div>
 
-    <div class="bottom-bar no-print">
-        <a href="index.html"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
-        <button class="btn-main" style="background: white; color: var(--secondary-blue); padding: 6px 15px;" onclick="window.print()"><i class="fa-solid fa-print"></i> Print Report</button>
+    <div class="modal-overlay" id="docModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Upload to Vault</h3>
+                <button class="close-btn" onclick="closeModal('docModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="docForm" onsubmit="saveDocument(event)">
+                    <input type="hidden" id="docId">
+                    <input type="hidden" id="existingDriveFileId">
+                    
+                    <div class="form-group">
+                        <label>Document Title</label>
+                        <input type="text" id="docTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Valid Until (Expiry)</label>
+                        <input type="date" id="docExpiry" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Attach File</label>
+                        <input type="file" id="docFile" accept="image/*,application/pdf">
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                        <button type="button" class="btn-ui" style="background: #64748b;" onclick="closeModal('docModal')">Cancel</button>
+                        <button type="submit" class="btn-ui btn-success" id="submitBtn"><i class="fa-solid fa-save"></i> Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="viewerModal">
+        <div class="modal-content viewer-content">
+            <div class="modal-header">
+                <h3 id="viewerTitle">Document Preview</h3>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <button id="shareBtn" class="btn-ui btn-primary btn-small" onclick="shareDocument()"><i class="fa-solid fa-share-nodes"></i> <span id="shareText">Share (24h)</span></button>
+                    <button class="close-btn" onclick="closeModal('viewerModal')">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body viewer-body">
+                <iframe id="docIframe" src=""></iframe>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Use browser's local storage to save the licenses
-        const storageKey = 'BaharComplianceDB';
+        // ==========================================
+        // 1. CREDENTIALS (PASTE YOURS HERE)
+        // ==========================================
+        const CLIENT_ID = '440823822308-gasu0kbgb0ale7934isqfoiarvimpk7t.apps.googleusercontent.com';
+        const API_KEY = 'AIzaSyCagB4tL-k62EOcSSrUFceJBi0hhmF6Yeg';
+        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
+        // ==========================================
+        // 2. 1-HOUR CACHE MEMORY & SESSION SYSTEM
+        // ==========================================
+        const TOKEN_KEY = 'BaharToken';
+        const EXPIRY_KEY = 'BaharExpiry';
         
-        function getLicenses() {
-            const data = localStorage.getItem(storageKey);
-            return data ? JSON.parse(data) : [];
+        let tokenClient;
+        let accessToken = null;
+        let currentTab = 'active';
+        let activeFolderId = null;
+        let inactiveFolderId = null;
+        const storageKey = 'BaharVaultDB';
+
+        window.onload = function() {
+            gapi.load('client', initializeGapiClient);
+            
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                prompt: '', 
+                callback: (tokenResponse) => {
+                    accessToken = tokenResponse.access_token;
+                    localStorage.setItem(TOKEN_KEY, accessToken);
+                    localStorage.setItem(EXPIRY_KEY, Date.now() + (tokenResponse.expires_in * 1000));
+                    unlockVault();
+                },
+            });
+        };
+
+        async function initializeGapiClient() {
+            await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] });
+            checkExistingSession(); 
         }
 
-        function saveLicenses(licenses) {
-            localStorage.setItem(storageKey, JSON.stringify(licenses));
+        function checkExistingSession() {
+            const savedToken = localStorage.getItem(TOKEN_KEY);
+            const expiry = localStorage.getItem(EXPIRY_KEY);
+
+            if (savedToken && expiry && Date.now() < parseInt(expiry)) {
+                accessToken = savedToken;
+                gapi.client.setToken({ access_token: accessToken });
+                unlockVault();
+                startSessionTimer(expiry);
+            } else {
+                document.getElementById('secureOverlay').style.display = 'flex';
+            }
         }
 
-        // Format Date to DD-MMM-YYYY
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        function handleAuthClick() { tokenClient.requestAccessToken(); }
+
+        function unlockVault() {
+            document.getElementById('secureOverlay').style.display = 'none';
+            document.getElementById('uploadBtn').disabled = false;
+            setupDriveFolders(); 
+            
+            // Check for expired links the moment the vault unlocks
+            revokeExpiredLinks(); 
         }
 
-        // Calculate days left
-        function getDaysLeft(expiryDate) {
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            const expiry = new Date(expiryDate);
-            const diffTime = expiry - today;
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        function startSessionTimer(expiryTime) {
+            setInterval(() => {
+                let minutesLeft = Math.floor((expiryTime - Date.now()) / 60000);
+                if(minutesLeft <= 0) location.reload(); 
+                document.getElementById('sessionTimer').innerText = `Session Ends: ${minutesLeft}m`;
+                
+                // Continuously check for expired links every minute while the portal is open
+                revokeExpiredLinks();
+            }, 60000);
         }
 
-        // Render Table and Dashboard Widgets
-        function renderTracker() {
-            const licenses = getLicenses();
-            const tbody = document.getElementById('trackerBody');
+        // ==========================================
+        // 3. FOLDERS & DATA ENGINE
+        // ==========================================
+        async function setupDriveFolders() {
+            activeFolderId = await getOrCreateFolder('Bahar_Active_Compliance');
+            inactiveFolderId = await getOrCreateFolder('Bahar_Inactive_Archive');
+            renderVault(); 
+        }
+
+        async function getOrCreateFolder(folderName) {
+            let response = await gapi.client.drive.files.list({
+                q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`,
+                fields: 'files(id)'
+            });
+            if (response.result.files.length > 0) return response.result.files[0].id;
+            
+            let newFolder = await gapi.client.drive.files.create({ 
+                resource: { 'name': folderName, 'mimeType': 'application/vnd.google-apps.folder' }, 
+                fields: 'id' 
+            });
+            return newFolder.result.id;
+        }
+
+        function getDocuments() { return JSON.parse(localStorage.getItem(storageKey)) || []; }
+
+        // ==========================================
+        // 4. UI & TABLE LOGIC
+        // ==========================================
+        function getStatus(expiryDate, isInactive) {
+            if (isInactive) return { text: 'Inactive', class: 'badge-inactive', group: 'archive' };
+            const diffDays = Math.ceil((new Date(expiryDate) - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+            if (diffDays < 0) return { text: 'Expired', class: 'badge-expired', group: 'expired' };
+            if (diffDays <= 30) return { text: `${diffDays}d Left`, class: 'badge-expiring', group: 'expiring' };
+            return { text: 'Active', class: 'badge-active', group: 'active' };
+        }
+
+        function switchTab(tabName) {
+            currentTab = tabName;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            renderVault();
+        }
+
+        function renderVault() {
+            const docs = getDocuments();
+            const tbody = document.getElementById('vaultTableBody');
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
             tbody.innerHTML = '';
 
-            let countWarning = 0;
-            let countExpired = 0;
+            let counts = { active: 0, expiring: 0, expired: 0 };
 
-            // Sort licenses by days left (closest to expiring first)
-            licenses.sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
+            const processedDocs = docs.map(doc => {
+                const status = getStatus(doc.expiry, doc.isInactive);
+                if(!doc.isInactive) {
+                    if (status.group === 'active') counts.active++;
+                    else if (status.group === 'expiring') counts.expiring++;
+                    else if (status.group === 'expired') counts.expired++;
+                }
+                return { ...doc, status };
+            }).filter(doc => {
+                const inCorrectTab = currentTab === 'active' ? !doc.isInactive : doc.isInactive;
+                const matchesSearch = doc.title.toLowerCase().includes(searchQuery);
+                return inCorrectTab && matchesSearch;
+            }).sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
 
-            licenses.forEach((lic, index) => {
-                const daysLeft = getDaysLeft(lic.expiry);
-                let statusHtml = '';
-                let trStyle = '';
+            document.getElementById('statActive').innerText = counts.active;
+            document.getElementById('statExpiring').innerText = counts.expiring;
+            document.getElementById('statExpired').innerText = counts.expired;
 
-                // Logic for Colors & Status
-                if (daysLeft < 0) {
-                    statusHtml = '<span class="badge badge-expired">Expired</span>';
-                    trStyle = 'background-color: #fef2f2;';
-                    countExpired++;
-                } else if (daysLeft <= 30) {
-                    statusHtml = '<span class="badge badge-warning">Expiring Soon</span>';
-                    trStyle = 'background-color: #fffbeb;';
-                    countWarning++;
-                } else {
-                    statusHtml = '<span class="badge badge-active">Active</span>';
+            if (processedDocs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 30px; color: #94a3b8;">No documents found.</td></tr>`;
+                return;
+            }
+
+            processedDocs.forEach(doc => {
+                const dateFmt = new Date(doc.expiry).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+                
+                const fileHtml = doc.driveFileId 
+                    ? `<span class="file-indicator" onclick="openViewer('${doc.driveFileId}', '${doc.title.replace(/'/g, "\\'")}')"><i class="fa-solid fa-eye"></i> View</span>`
+                    : `<span style="color: #94a3b8;"><i class="fa-solid fa-minus"></i> N/A</span>`;
+
+                const actionHtml = `
+                    <div class="action-buttons">
+                        <button class="btn-ui btn-small btn-primary" onclick="editDocument('${doc.id}')"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn-ui btn-small ${doc.isInactive ? 'btn-success' : 'btn-warning'}" onclick="toggleStatus('${doc.id}')">
+                            <i class="fa-solid ${doc.isInactive ? 'fa-rotate-left' : 'fa-box-archive'}"></i>
+                        </button>
+                        <button class="btn-ui btn-small btn-danger" onclick="deleteDocument('${doc.id}')"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight: 600;">${doc.title}</td>
+                        <td>${fileHtml}</td>
+                        <td>${dateFmt}</td>
+                        <td><span class="status-badge ${doc.status.class}">${doc.status.text}</span></td>
+                        <td style="text-align: right;">${actionHtml}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // ==========================================
+        // 5. IN-PAGE VIEWER & SECURE SHARING (24H)
+        // ==========================================
+        let currentShareLink = "";
+        let currentShareTitle = "";
+        let currentShareFileId = "";
+
+        function openViewer(fileId, title) {
+            currentShareFileId = fileId; 
+            currentShareTitle = title;
+            currentShareLink = `https://drive.google.com/file/d/${fileId}/view?usp=sharing`; 
+            
+            document.getElementById('viewerTitle').innerText = title;
+            document.getElementById('docIframe').src = `https://drive.google.com/file/d/${fileId}/preview`;
+            document.getElementById('viewerModal').style.display = 'flex';
+            
+            document.getElementById('shareText').innerText = 'Share (24h)';
+            document.getElementById('shareBtn').disabled = false;
+        }
+
+        async function shareDocument() {
+            const btn = document.getElementById('shareBtn');
+            const span = document.getElementById('shareText');
+            
+            span.innerText = 'Securing Link...';
+            btn.disabled = true;
+
+            try {
+                // 1. Create the "Anyone can view" permission
+                const permRes = await gapi.client.drive.permissions.create({
+                    fileId: currentShareFileId,
+                    resource: { type: 'anyone', role: 'reader' }
+                });
+                
+                // 2. Disable Download, Print, and Copy
+                await gapi.client.drive.files.update({
+                    fileId: currentShareFileId,
+                    resource: { copyRequiresWriterPermission: true }
+                });
+
+                // 3. Save the timestamp & permission ID to local storage for the 24h self-destruct
+                let docs = getDocuments();
+                let docIndex = docs.findIndex(d => d.driveFileId === currentShareFileId);
+                if (docIndex > -1) {
+                    docs[docIndex].sharedAt = Date.now();
+                    docs[docIndex].sharePermissionId = permRes.result.id;
+                    localStorage.setItem(storageKey, JSON.stringify(docs));
                 }
 
-                const tr = document.createElement('tr');
-                tr.style.cssText = trStyle;
-                tr.innerHTML = `
-                    <td style="font-weight: 500;">${lic.name}</td>
-                    <td>${lic.authority}</td>
-                    <td style="font-weight: 600;">${formatDate(lic.expiry)}</td>
-                    <td style="font-weight: bold; color: ${daysLeft < 0 ? 'red' : 'inherit'};">${daysLeft < 0 ? 'Overdue by ' + Math.abs(daysLeft) : daysLeft}</td>
-                    <td>${statusHtml}</td>
-                    <td class="no-print"><button class="btn-main btn-danger" onclick="deleteLicense(${index})"><i class="fa-solid fa-trash"></i></button></td>
-                `;
-                tbody.appendChild(tr);
-            });
+                // 4. Trigger the Share
+                if (navigator.share) {
+                    await navigator.share({
+                        title: currentShareTitle + ' - Bahar Service Station',
+                        text: 'Secure View-Only Link (Expires in 24 Hours): ' + currentShareTitle,
+                        url: currentShareLink
+                    });
+                } else {
+                    await navigator.clipboard.writeText(currentShareLink);
+                    alert("Secure Link Copied! It will expire in 24 hours.\n\n" + currentShareLink);
+                }
+                
+                span.innerText = 'Shared!';
+                setTimeout(() => { span.innerText = 'Share (24h)'; btn.disabled = false; }, 3000);
 
-            // If empty
-            if(licenses.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#666;">No licenses tracked yet. Add one above!</td></tr>';
+            } catch (err) {
+                console.error("Failed to secure the document:", err);
+                alert("Error securing document permissions. Check console.");
+                span.innerText = 'Share (24h)';
+                btn.disabled = false;
             }
-
-            // Update Widgets
-            document.getElementById('count-total').innerText = licenses.length;
-            document.getElementById('count-warning').innerText = countWarning;
-            document.getElementById('count-expired').innerText = countExpired;
         }
 
-        // Add new License
-        function addLicense(e) {
-            e.preventDefault();
-            const name = document.getElementById('licName').value.trim();
-            const auth = document.getElementById('licAuth').value.trim();
-            const expiry = document.getElementById('licExpiry').value;
-
-            if(!name || !auth || !expiry) return;
-
-            const licenses = getLicenses();
-            licenses.push({ name, authority: auth, expiry });
-            saveLicenses(licenses);
+        // 5b. LINK SNIPER: Revokes permissions older than 24 hours
+        async function revokeExpiredLinks() {
+            if (!accessToken) return; 
             
-            document.getElementById('licenseForm').reset(); // Clear form
-            renderTracker(); // Refresh screen
-        }
+            let docs = getDocuments();
+            let dataChanged = false;
+            const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000; 
 
-        // Delete License
-        function deleteLicense(index) {
-            if(confirm("Are you sure you want to remove this record?")) {
-                const licenses = getLicenses();
-                licenses.splice(index, 1);
-                saveLicenses(licenses);
-                renderTracker();
+            for (let i = 0; i < docs.length; i++) {
+                let doc = docs[i];
+                
+                if (doc.sharedAt && doc.sharePermissionId) {
+                    if (Date.now() - doc.sharedAt > TWENTY_FOUR_HOURS) {
+                        try {
+                            await gapi.client.drive.permissions.delete({
+                                fileId: doc.driveFileId,
+                                permissionId: doc.sharePermissionId
+                            });
+                            console.log(`🔒 24h Expired: Link revoked for ${doc.title}`);
+                        } catch (err) {
+                            console.warn("Link already revoked or file missing.", err);
+                        }
+                        
+                        delete doc.sharedAt;
+                        delete doc.sharePermissionId;
+                        dataChanged = true;
+                    }
+                }
+            }
+
+            if (dataChanged) {
+                localStorage.setItem(storageKey, JSON.stringify(docs));
             }
         }
 
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', renderTracker);
+        function closeModal(modalId) { 
+            document.getElementById(modalId).style.display = 'none'; 
+            if(modalId === 'viewerModal') document.getElementById('docIframe').src = ""; 
+        }
+
+        function openDocModal() {
+            document.getElementById('docForm').reset();
+            document.getElementById('docId').value = '';
+            document.getElementById('existingDriveFileId').value = '';
+            document.getElementById('modalTitle').innerText = 'Upload to Vault';
+            document.getElementById('docModal').style.display = 'flex';
+        }
+
+        // ==========================================
+        // 6. UPLOAD & DATA MUTATION
+        // ==========================================
+        async function saveDocument(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = 'Saving...'; btn.disabled = true;
+
+            const id = document.getElementById('docId').value || Math.random().toString(36).substr(2, 9);
+            const title = document.getElementById('docTitle').value.trim();
+            const expiry = document.getElementById('docExpiry').value;
+            const fileInput = document.getElementById('docFile');
+            
+            let docs = getDocuments();
+            let existingDocIndex = docs.findIndex(d => d.id === id);
+            let driveFileId = document.getElementById('existingDriveFileId').value || null;
+            let isInactive = existingDocIndex > -1 ? docs[existingDocIndex].isInactive : false;
+
+            if (fileInput.files.length > 0) {
+                const metadata = { name: fileInput.files[0].name, parents: [isInactive ? inactiveFolderId : activeFolderId] };
+                const form = new FormData();
+                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                form.append('file', fileInput.files[0]);
+
+                const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+                    method: 'POST',
+                    headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+                    body: form
+                });
+                driveFileId = (await res.json()).id;
+            }
+
+            const newRecord = { id, title, expiry, driveFileId, isInactive };
+            // Preserve the share state if editing an existing document
+            if (existingDocIndex > -1) {
+                if (docs[existingDocIndex].sharedAt) newRecord.sharedAt = docs[existingDocIndex].sharedAt;
+                if (docs[existingDocIndex].sharePermissionId) newRecord.sharePermissionId = docs[existingDocIndex].sharePermissionId;
+                docs[existingDocIndex] = newRecord;
+            } else {
+                docs.push(newRecord);
+            }
+            
+            localStorage.setItem(storageKey, JSON.stringify(docs));
+            
+            btn.innerHTML = '<i class="fa-solid fa-save"></i> Save'; btn.disabled = false;
+            closeModal('docModal');
+            renderVault();
+        }
+
+        async function toggleStatus(id) {
+            let docs = getDocuments();
+            let doc = docs.find(d => d.id === id);
+            if (doc) {
+                doc.isInactive = !doc.isInactive;
+                if (doc.driveFileId) {
+                    await gapi.client.drive.files.update({
+                        fileId: doc.driveFileId,
+                        addParents: doc.isInactive ? inactiveFolderId : activeFolderId,
+                        removeParents: doc.isInactive ? activeFolderId : inactiveFolderId,
+                        fields: 'id'
+                    });
+                }
+                localStorage.setItem(storageKey, JSON.stringify(docs));
+                renderVault();
+            }
+        }
+
+        function deleteDocument(id) {
+            if (confirm("Delete this record permanently?")) {
+                let docs = getDocuments();
+                docs = docs.filter(d => d.id !== id);
+                localStorage.setItem(storageKey, JSON.stringify(docs));
+                renderVault();
+            }
+        }
+        
+        function editDocument(id) {
+            const doc = getDocuments().find(d => d.id === id);
+            if (doc) {
+                document.getElementById('docId').value = doc.id;
+                document.getElementById('existingDriveFileId').value = doc.driveFileId || '';
+                document.getElementById('docTitle').value = doc.title;
+                document.getElementById('docExpiry').value = doc.expiry;
+                document.getElementById('modalTitle').innerText = 'Edit Record';
+                document.getElementById('docModal').style.display = 'flex';
+            }
+        }
     </script>
 </body>
 </html>

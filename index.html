@@ -4,93 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Official Portal - Bahar Service Station</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link rel="stylesheet" href="css/global.css">
     <style>
-        :root {
-            --primary-blue: #004b87; 
-            --secondary-blue: #003366;
-            --accent-yellow: #f1c40f;
-            --bg-light: #f4f7f6;
-            --text-dark: #333333;
-            --border-color: #dee2e6;
-        }
-
-        body {
-            margin: 0; padding: 0; font-family: 'Roboto', sans-serif;
-            background-color: var(--bg-light); color: var(--text-dark);
-        }
-
-        /* TOP HEADER */
-        .top-bar {
-            background-color: var(--text-dark); color: white; font-size: 0.8rem;
-            padding: 5px 5%; display: flex; justify-content: space-between; flex-wrap: wrap; text-align: center;
-        }
-
-        .header-main {
-            background: white; padding: 15px 5%; display: flex; align-items: center; gap: 20px;
-            border-bottom: 3px solid var(--accent-yellow); flex-wrap: wrap; justify-content: center;
-        }
-        .header-main img { height: 70px; }
-        .header-text { text-align: center; }
-        @media (min-width: 600px) { .header-text { text-align: left; } .header-main { justify-content: flex-start; } }
+        .container { padding: 40px 5%; display: flex; gap: 40px; max-width: 1400px; margin: 0 auto; flex-direction: column; }
+        @media (min-width: 1000px) { .container { flex-direction: row; } }
         
-        .header-text h1 { margin: 0; color: var(--primary-blue); font-size: clamp(1.2rem, 3vw, 1.8rem); font-weight: 900; letter-spacing: 0.5px; }
-        .header-text p { margin: 2px 0 0 0; font-size: 0.95rem; font-weight: 700; color: #555; }
-
-        /* NAVIGATION RIBBON */
-        .nav-ribbon {
-            background-color: var(--primary-blue); padding: 0 5%; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
-        }
-        .nav-ribbon a {
-            color: white; text-decoration: none; padding: 12px 15px; font-size: 0.9rem; font-weight: 500; transition: 0.2s; white-space: nowrap;
-        }
-        .nav-ribbon a:hover, .nav-ribbon a.active { background-color: var(--secondary-blue); border-bottom: 3px solid var(--accent-yellow); }
-        @media (min-width: 600px) { .nav-ribbon { justify-content: flex-start; gap: 20px; } }
-
-        /* MAIN LAYOUT */
-        .container { padding: 30px 5%; display: flex; gap: 30px; max-width: 1400px; margin: 0 auto; flex-direction: column; }
-        @media (min-width: 900px) { .container { flex-direction: row; } }
-
         .main-content { flex: 3; }
-        .section-title { color: var(--primary-blue); font-size: 1.5rem; border-bottom: 2px solid var(--primary-blue); padding-bottom: 8px; margin-top: 0; margin-bottom: 20px; }
-
-        .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-
+        .section-title { color: #004b87; font-size: 1.6rem; border-bottom: 3px solid #f1c40f; padding-bottom: 10px; margin-top: 0; margin-bottom: 25px; display: inline-block;}
+        
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+        
         .service-card {
-            background: white; border: 1px solid var(--border-color); border-top: 4px solid var(--primary-blue);
-            padding: 20px; text-decoration: none; color: inherit; display: flex; flex-direction: column;
-            transition: 0.2s box-shadow; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            background: white; border: 1px solid #dee2e6; border-radius: 8px; border-top: 5px solid #004b87;
+            padding: 25px; text-decoration: none; color: inherit; display: flex; flex-direction: column;
+            transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; overflow: hidden;
         }
-        .service-card:hover { box-shadow: 0 8px 15px rgba(0,0,0,0.1); transform: translateY(-2px); }
-        .service-icon { font-size: 2rem; color: var(--primary-blue); margin-bottom: 15px; }
-        .service-card h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: var(--secondary-blue); }
-        .service-card p { margin: 0 0 15px 0; font-size: 0.9rem; color: #666; line-height: 1.5; flex-grow: 1; }
-        .service-card .btn-link { color: var(--primary-blue); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
-        .service-card .btn-active { color: var(--success, #10b981); }
-
-        /* NOTICE BOARD */
-        .sidebar { flex: 1; min-width: 250px; }
-        .notice-board { background: white; border: 1px solid var(--border-color); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .notice-header { background: var(--secondary-blue); color: white; padding: 12px 15px; font-size: 1.1rem; font-weight: 700; }
+        .service-card:hover { box-shadow: 0 12px 20px rgba(0,0,0,0.1); transform: translateY(-5px); }
+        .service-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, rgba(0,75,135,0.02) 0%, rgba(255,255,255,0) 100%); pointer-events: none;}
+        
+        .service-icon { font-size: 2.5rem; color: #004b87; margin-bottom: 15px; }
+        .service-card h3 { margin: 0 0 10px 0; font-size: 1.25rem; color: #003366; font-weight: 800; }
+        .service-card p { margin: 0 0 20px 0; font-size: 0.95rem; color: #555; line-height: 1.6; flex-grow: 1; }
+        
+        .btn-link { font-weight: 700; font-size: 0.9rem; text-transform: uppercase; display: flex; align-items: center; gap: 8px; padding: 10px 15px; background: #f8fafc; border-radius: 6px; width: fit-content; transition: 0.2s;}
+        .service-card:hover .btn-link { background: #004b87; color: white !important; }
+        
+        .sidebar { flex: 1; min-width: 300px; }
+        .notice-board { background: white; border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden;}
+        .notice-header { background: #0f172a; color: white; padding: 15px 20px; font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 10px;}
         .notice-list { list-style: none; padding: 0; margin: 0; }
-        .notice-list li { padding: 15px; border-bottom: 1px dashed var(--border-color); font-size: 0.9rem; display: flex; gap: 10px; }
+        .notice-list li { padding: 18px 20px; border-bottom: 1px solid #dee2e6; font-size: 0.95rem; display: flex; gap: 12px; line-height: 1.5; transition: 0.2s;}
+        .notice-list li:hover { background: #f8fafc; }
         .notice-list li:last-child { border-bottom: none; }
-        .notice-list li i { color: var(--danger, #ef4444); margin-top: 3px; }
-        .notice-list li span { color: #555; display: block; font-size: 0.8rem; margin-top: 5px; font-weight: bold;}
-
-        /* FOOTER */
-        .footer { background-color: var(--text-dark); color: white; text-align: center; padding: 20px; font-size: 0.85rem; margin-top: 40px; border-top: 4px solid var(--primary-blue); }
+        
+        .footer { background-color: #0f172a; color: #94a3b8; text-align: center; padding: 25px; font-size: 0.9rem; margin-top: 60px; border-top: 4px solid #004b87; }
+        
+        /* Universal Back Button Style */
+        .back-btn { color: white; text-decoration: none; font-weight: bold; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 4px; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;}
+        .back-btn:hover { background: rgba(255,255,255,0.4); }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
-        <div>Authorized Dealer E-Services Portal</div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="javascript:history.back()" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back</a>
+            <span>Authorized Dealer E-Services Portal</span>
+        </div>
         <div>Strictly for Official Dealer Use</div>
     </div>
-
+    
     <header class="header-main">
         <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Official_BPCL_LOGO.jpg" alt="BPCL Logo">
         <div class="header-text">
@@ -98,11 +62,9 @@
             <p>DEALER: BHARAT PETROLEUM CORP LTD.</p>
         </div>
     </header>
-
+    
     <nav class="nav-ribbon">
         <a href="index.html" class="active"><i class="fa-solid fa-house"></i> Dashboard Home</a>
-        <a href="#"><i class="fa-solid fa-file-contract"></i> Compliance</a>
-        <a href="#"><i class="fa-solid fa-chart-line"></i> Reports</a>
     </nav>
 
     <div class="container">
@@ -113,30 +75,30 @@
                 
                 <a href="fuelinvoice.html" class="service-card">
                     <i class="fa-solid fa-gas-pump service-icon"></i>
-                    <h3>Fuel Billing Module</h3>
-                    <p>Issue consolidated fuel bills for S.D.O and corporate clients. Automated total calculations and standard formatting.</p>
-                    <div class="btn-link">Proceed to Module <i class="fa-solid fa-arrow-right"></i></div>
+                    <h3>Fuel Billing Engine</h3>
+                    <p>Issue consolidated fuel bills for S.D.O and corporate clients with automated total calculations.</p>
+                    <div class="btn-link" style="color: #004b87;">Launch Engine <i class="fa-solid fa-arrow-right"></i></div>
                 </a>
 
                 <a href="stampinginvoice.html" class="service-card">
                     <i class="fa-solid fa-file-invoice-dollar service-icon"></i>
                     <h3>Stamping Tax Invoice</h3>
-                    <p>Generate official tax reimbursement invoices. Includes auto-number-to-words, taxation handling, and Challan PDF attachment features.</p>
-                    <div class="btn-link">Proceed to Module <i class="fa-solid fa-arrow-right"></i></div>
+                    <p>Generate official tax reimbursement invoices with HSN/SAC codes and automated word-number conversions.</p>
+                    <div class="btn-link" style="color: #004b87;">Launch Engine <i class="fa-solid fa-arrow-right"></i></div>
                 </a>
 
-                <a href="letter.html" class="service-card" style="border-top-color: #10b981;">
+                <a href="letter-templates.html" class="service-card" style="border-top-color: #10b981;">
                     <i class="fa-solid fa-envelope-open-text service-icon" style="color:#10b981;"></i>
-                    <h3>Formal Letter Generator</h3>
-                    <p>Draft official letters on company letterheads. Includes a built-in Template System to save and reuse common formats.</p>
-                    <div class="btn-link btn-active">Active Module <i class="fa-solid fa-arrow-right"></i></div>
+                    <h3 style="color: #047857;">Formal Letter Generator</h3>
+                    <p>Draft official letters on company letterheads with an integrated template saving and preview system.</p>
+                    <div class="btn-link" style="color:#10b981;">Launch Engine <i class="fa-solid fa-arrow-right"></i></div>
                 </a>
 
                 <a href="tracker.html" class="service-card" style="border-top-color: #f59e0b;">
-                    <i class="fa-solid fa-clock-rotate-left service-icon" style="color:#f59e0b;"></i>
-                    <h3>Compliance Tracker</h3>
-                    <p>Monitor expiry dates for Legal Metrology, PESO, Trade Licenses, etc. Get color-coded warnings for upcoming renewals.</p>
-                    <div class="btn-link" style="color: #f59e0b;">Active Module <i class="fa-solid fa-arrow-right"></i></div>
+                    <i class="fa-solid fa-folder-open service-icon" style="color: #f59e0b;"></i>
+                    <h3 style="color: #d97706;">Document & Compliance Vault</h3>
+                    <p>Manage, view, and track expiry dates for active and inactive licenses, PESO certificates, and legal metrology documents.</p>
+                    <div class="btn-link" style="color: #f59e0b;">Open Vault <i class="fa-solid fa-arrow-right"></i></div>
                 </a>
 
             </div>
@@ -144,27 +106,20 @@
 
         <aside class="sidebar">
             <div class="notice-board">
-                <div class="notice-header"><i class="fa-solid fa-bullhorn"></i> Notice Board</div>
+                <div class="notice-header"><i class="fa-solid fa-bullhorn" style="color: #f1c40f;"></i> Notice Board</div>
                 <ul class="notice-list">
                     <li>
-                        <i class="fa-solid fa-chevron-right"></i>
+                        <i class="fa-solid fa-circle-exclamation" style="color: #ef4444; margin-top: 4px;"></i>
                         <div>
-                            License & Compliance Expiry Tracker Deployed. Start tracking your renewals today!
-                            <span>TODAY</span>
+                            <strong>Document Vault Updated</strong><br>
+                            <span style="color: #64748b; font-size: 0.85rem;">Active/Inactive sorting and file viewing now deployed.</span>
                         </div>
                     </li>
                     <li>
-                        <i class="fa-solid fa-chevron-right"></i>
+                        <i class="fa-solid fa-circle-check" style="color: #10b981; margin-top: 4px;"></i>
                         <div>
-                            Formal Letter Generator Deployed. Template Saving now active.
-                            <span>RECENT</span>
-                        </div>
-                    </li>
-                    <li>
-                        <i class="fa-solid fa-chevron-right"></i>
-                        <div>
-                            New Tax Invoice Module Deployed with integrated PDF Merging.
-                            <span>15-MAY-2024</span>
+                            <strong>Global Headers Synced</strong><br>
+                            <span style="color: #64748b; font-size: 0.85rem;">All modules now share the official BPCL letterhead.</span>
                         </div>
                     </li>
                 </ul>
@@ -173,9 +128,8 @@
     </div>
 
     <footer class="footer">
-        &copy; 2024 Bahar Service Station. All Rights Reserved. <br>
-        Designed for internal documentation and compliance.
+        <strong>&copy; 2026 Bahar Service Station.</strong><br>
+        Designed for internal documentation and compliance management.
     </footer>
-
 </body>
 </html>

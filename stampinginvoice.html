@@ -5,57 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bahar Service Station - Professional Invoice</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/panel.css">
+
     <style>
-        :root {
-            --primary: #004b87; 
-            --bg-color: #cbd5e1; 
-            --text-main: #000000;
-            --danger: #ef4444;
-            --success: #10b981;
-            --bar-bg: #0f172a;
-        }
-
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            background: var(--bg-color); 
-            margin: 0; 
-            padding: 0 0 100px 0; 
-            color: var(--text-main); 
-        }
-
-        /* --- Strict A4 Page Simulation --- */
-        .invoice-container {
-            background: white;
-            width: 210mm; 
-            min-height: 297mm; 
-            margin: 40px auto; 
-            padding: 15mm 15mm 20mm 15mm;
-            box-sizing: border-box;
-            border-radius: 2px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-            position: relative;
-        }
-
+        /* Specific Styles strictly for the Invoice Tables */
         .corporate-border-box {
             border: 2px solid black;
             margin-top: 15px;
             padding-bottom: 20px;
         }
-
-        .editable-field { 
-            border: 1px dashed transparent; 
-            padding: 2px; 
-            border-radius: 2px; 
-            outline: none; 
-            transition: 0.2s;
-            min-width: 20px;
-            display: inline-block;
-            box-sizing: border-box;
-            width: 100%;
-        }
-        .editable-field:hover, .editable-field:focus { background: #f8fafc; border-color: #94a3b8; border-style: solid; }
-        .editable-field:empty:before { content: attr(data-placeholder); color: #94a3b8; font-style: italic; }
 
         .inline-edit { width: auto; min-width: 80px; text-align: center; font-weight: bold; background: #f1f5f9; border-bottom: 1px solid #cbd5e1; }
         .inline-edit:hover { background: #e2e8f0; }
@@ -67,190 +28,203 @@
         .no-top-border { border-top: none !important; }
         .no-left-border { border-left: none !important; }
         .no-right-border { border-right: none !important; }
+        .no-bottom-border { border-bottom: none !important; }
 
         .action-col { width: 40px; text-align: center !important; border-right: none !important; }
-        .btn-small { padding: 4px 8px; font-size: 0.75rem; border: none; border-radius: 4px; cursor: pointer; color: white; background: var(--primary); }
+        .btn-small { padding: 4px 8px; font-size: 0.75rem; border: none; border-radius: 4px; cursor: pointer; color: white; background: #004b87; }
         .btn-clear { background: var(--danger); }
         .controls-row { padding: 10px; display: flex; gap: 10px; }
+        
+        /* Default Screen Signature Gap */
+        .signature-box { margin-top: 90px; padding-right: 30px; text-align: right; font-size: 0.95rem; }
 
-        /* Bottom Bar */
-        .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bar-bg); color: white; padding: 15px 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); z-index: 1000; box-sizing: border-box; }
-        .bar-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-        .branding { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-        .branding span { font-size: 0.8rem; font-weight: 400; color: #94a3b8; }
-        .actions { display: flex; align-items: center; gap: 10px; }
-        .btn-main { border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; color: white; font-family: inherit; font-size: 0.95rem; display: flex; align-items: center; gap: 5px; }
-        .btn-primary { background: #3b82f6; } .btn-save { background: var(--success); } .btn-reset { background: var(--danger); }
-        .btn-main:hover { filter: brightness(0.9); }
-
+        /* Print Specific Adjustments to Force 1 Page and Fix the Signature Gap */
         @media print {
-            @page { size: A4 portrait; margin: 0; }
-            html, body { background: white; margin: 0; padding: 0; }
-            .no-print { display: none !important; }
-            .invoice-container { width: 210mm; height: 297mm; box-shadow: none; border: none; padding: 10mm; margin: 0; border-radius: 0; }
-            .editable-field { border: none !important; padding: 0 !important; background: transparent !important; }
+            @page {
+                size: A4 portrait;
+                margin: 10mm; /* Slightly smaller margin to give more breathing room */
+            }
+            html, body { 
+                background: white; 
+                margin: 0; 
+                padding: 0; 
+                /* This aggressively kills the blank second page */
+                height: 99%; 
+                overflow: hidden; 
+                page-break-after: avoid;
+            }
+            
+            /* Hide the web portal UI entirely */
+            .top-bar, .header-main, .nav-ribbon, #bahar-control-panel, .no-print {
+                display: none !important;
+            }
+            
+            /* Reset the workspace so it acts like a piece of paper */
+            .app-workspace { padding: 0 !important; margin: 0 !important; background: transparent !important; }
+            .a4-document { box-shadow: none !important; border: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; page-break-inside: avoid; }
+            
+            /* Tweak internal padding and gaps to save vertical space */
             .inline-edit { background: transparent !important; border: none !important; }
-            .grid-table td, .grid-table th { border: 1px solid black !important; }
+            .grid-table td, .grid-table th { border: 1px solid black !important; padding: 4px 6px !important; }
             .action-col { display: none !important; }
-            .corporate-border-box { border: 2px solid black !important; }
+            .corporate-border-box { border: 2px solid black !important; padding-bottom: 5px !important; }
+            
+            /* Clean, specific gap for the dealer signature in print mode */
+            .signature-box { margin-top: 75px !important; } 
         }
     </style>
 </head>
 <body>
 
-    <div class="invoice-container" id="printableInvoice">
-        
-        <div style="display: flex; align-items: center; justify-content: center; position: relative; padding-bottom: 10px; border-bottom: 2px solid var(--primary); margin-bottom: 10px;">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Official_BPCL_LOGO.jpg" alt="BPCL" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 80px; height: auto;">
-            <div style="text-align: center; width: 100%; padding: 0 90px;">
-                <h1 style="margin:0; color:var(--primary); font-size: 1.6rem; font-weight: 800; letter-spacing: 1px;">M/S. BAHAR SERVICE STATION</h1>
-                <p style="margin:4px 0 2px 0; font-weight: 700; font-size: 1rem;">DEALER: BHARAT PETROLEUM CORP LTD.</p>
-                <p style="margin:2px 0; font-size: 0.85rem; color: #334155;">VILL-DEVOKE, P.O.MAMUDPUR, P.S.SHIBDASPUR, DIST-N24 PARGANAS, PIN 743166, WB</p>
-                <p style="margin:2px 0; font-size: 0.85rem; color: #334155;">CONTACT - 7018579966, 9088086294</p>
-                <p style="margin:2px 0; font-size: 0.85rem; color: #334155;">EMAIL - BAHARSERVICESTATION@GMAIL.COM</p>
-            </div>
-        </div>
+    <div class="top-bar"><div>Authorized Dealer E-Services Portal</div><div>Strictly for Official Dealer Use</div></div>
+    <header class="header-main"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Official_BPCL_LOGO.jpg" alt="BPCL Logo">
+        <div class="header-text"><h1>BAHAR SERVICE STATION</h1><p>STAMPING INVOICE MODULE</p></div>
+    </header>
+    <nav class="nav-ribbon">
+        <a href="index.html"><i class="fa-solid fa-house"></i> Dashboard Home</a>
+        <a href="stampinginvoice.html" class="active"><i class="fa-solid fa-file-invoice-dollar"></i> Stamping Invoice</a>
+    </nav>
 
-        <h3 style="text-align: center; margin: 15px 0 5px 0; font-weight: 800; font-size: 1.2rem; letter-spacing: 1px;">INVOICE</h3>
-
-        <div class="corporate-border-box">
+    <div class="app-workspace">
+        <div class="a4-document" id="printableInvoice">
             
-            <table class="grid-table no-top-border no-left-border no-right-border">
-                <tr>
-                    <td style="width: 15%;"><strong>INVOICE NO:</strong></td>
-                    <td style="width: 35%;"><div contenteditable="true" class="editable-field" data-placeholder="Enter Invoice No"></div></td>
-                    <td style="width: 20%;"><strong>VENDOR CODE :</strong></td>
-                    <td style="width: 30%;">375911</td>
-                </tr>
-                <tr>
-                    <td><strong>INVOICE DATE:</strong></td>
-                    <td><div contenteditable="true" class="editable-field" data-placeholder="DD-MM-YYYY"></div></td>
-                    <td><strong>GSTN NO :</strong></td>
-                    <td>19AAWFB8708J1ZO</td>
-                </tr>
-                <tr>
-                    <td colspan="2" style="border-bottom: none;"></td>
-                    <td><strong>PAN NO :</strong></td>
-                    <td>AAWFB8708J</td>
-                </tr>
-            </table>
+            <div id="bahar-document-header"></div>
 
-            <div style="text-align: center; font-weight: bold; margin: 15px 0; font-size: 0.95rem;">
-                <div style="display:inline-block; width:auto; min-width: 300px; text-decoration: underline;">Subject: Reimbursement of Stamping Fee</div>
-            </div>
+            <h3 style="text-align: center; margin: 15px 0 5px 0; font-weight: 800; font-size: 1.2rem; letter-spacing: 1px;">INVOICE</h3>
 
-            <table class="grid-table no-left-border no-right-border" style="border-bottom: none;">
-                <tr>
-                    <td style="width: 50%; border-bottom: none;">
-                        <strong>Consignee/Buyer Address:</strong><br>
-                        <div style="font-weight: 600; line-height: 1.6; margin-top: 5px;">
-                            Bharat Petroleum Corporation Limited<br>
-                            Bharat Bhavan, Plot No.31<br>
-                            Prince Gulam Md.Shah Road,<br>
-                            Golf Green, Kolkata-700095
-                        </div>
-                    </td>
-                    <td style="width: 50%; border-bottom: none;">
-                        <strong>Billing Address:</strong><br>
-                        <div style="font-weight: 600; line-height: 1.6; margin-top: 5px;">
-                            M/s Bharat Petroleum Corporation Limited<br>
-                            Business Excellence center (BPEC)<br>
-                            Plot No.6, Sector-2<br>
-                            Behind CIDCO Garden. Kahargar,<br>
-                            NAVI MUMBAI-410210
-                        </div>
-                    </td>
-                </tr>
-            </table>
-            
-            <div style="padding: 10px; font-size: 0.85rem; font-weight: bold; border-top: 1px solid black; border-bottom: 1px solid black;">
-                BPCL PAN NO:AAACB2902M GSTN : 19AAACB2902M1ZQ
-            </div>
-
-            <table class="grid-table no-left-border no-right-border no-bottom-border" id="itemsTable" style="margin-top: 0;">
-                <thead>
-                    <tr>
-                        <th style="width: 8%; text-align: center;">SR NO.</th>
-                        <th style="width: 15%; text-align: center;">HSN/SAC</th>
-                        <th style="width: 45%; text-align: center;">Description</th>
-                        <th style="width: 10%; text-align: center;">QNTY</th>
-                        <th style="width: 10%; text-align: center;">RATE</th>
-                        <th style="width: 12%; text-align: center;">Amount</th>
-                        <th class="action-col no-print"></th>
-                    </tr>
-                </thead>
-                <tbody id="invoiceTableBody">
-                    <tr class="item-row">
-                        <td style="text-align: center;"><div contenteditable="true" class="editable-field">1</div></td>
-                        <td style="text-align: center;"><div contenteditable="true" class="editable-field">996211</div></td>
-                        <td><div contenteditable="true" class="editable-field">Stamping fee for the year 2025-2026</div></td>
-                        <td style="text-align: center;"><div contenteditable="true" class="editable-field val-qty">4</div></td>
-                        <td style="text-align: center;"><div contenteditable="true" class="editable-field val-rate">1500</div></td>
-                        <td style="text-align: center; font-weight: 500;" class="val-amount">6000</td>
-                        <td class="action-col no-print"><button class="btn-small btn-clear" onclick="deleteRow(this)">X</button></td>
-                    </tr>
-                </tbody>
+            <div class="corporate-border-box">
                 
-                <tbody id="totalsBody">
+                <table class="grid-table no-top-border no-left-border no-right-border">
                     <tr>
-                        <td colspan="3" rowspan="3" style="vertical-align: bottom; font-weight: bold; font-size: 0.9rem;">
-                            (Rs. <span id="wordsOutput">Six Thousand Only</span>)
+                        <td style="width: 15%;"><strong>INVOICE NO:</strong></td>
+                        <td style="width: 35%;"><div contenteditable="true" class="editable-field" data-placeholder="Enter Invoice No"></div></td>
+                        <td style="width: 20%;"><strong>VENDOR CODE :</strong></td>
+                        <td style="width: 30%;">375911</td>
+                    </tr>
+                    <tr>
+                        <td><strong>INVOICE DATE:</strong></td>
+                        <td><div contenteditable="true" class="editable-field" data-placeholder="DD-MM-YYYY"></div></td>
+                        <td><strong>GSTN NO :</strong></td>
+                        <td>19AAWFB8708J1ZO</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="border-bottom: none;"></td>
+                        <td><strong>PAN NO :</strong></td>
+                        <td>AAWFB8708J</td>
+                    </tr>
+                </table>
+
+                <div style="text-align: center; font-weight: bold; margin: 15px 0; font-size: 0.95rem;">
+                    <div style="display:inline-block; width:auto; min-width: 300px; text-decoration: underline;">Subject: Reimbursement of Stamping Fee</div>
+                </div>
+
+                <table class="grid-table no-left-border no-right-border" style="border-bottom: none;">
+                    <tr>
+                        <td style="width: 50%; border-bottom: none;">
+                            <strong>Consignee/Buyer Address:</strong><br>
+                            <div style="font-weight: 600; line-height: 1.6; margin-top: 5px;">
+                                Bharat Petroleum Corporation Limited<br>
+                                Bharat Bhavan, Plot No.31<br>
+                                Prince Gulam Md.Shah Road,<br>
+                                Golf Green, Kolkata-700095
+                            </div>
                         </td>
-                        <td colspan="2" style="text-align: right;">CGST</td>
-                        <td style="text-align: center;"><div contenteditable="true" class="editable-field val-tax" data-placeholder="NA">NA</div></td>
-                        <td class="action-col no-print"></td>
+                        <td style="width: 50%; border-bottom: none;">
+                            <strong>Billing Address:</strong><br>
+                            <div style="font-weight: 600; line-height: 1.6; margin-top: 5px;">
+                                M/s Bharat Petroleum Corporation Limited<br>
+                                Business Excellence center (BPEC)<br>
+                                Plot No.6, Sector-2<br>
+                                Behind CIDCO Garden. Kahargar,<br>
+                                NAVI MUMBAI-410210
+                            </div>
+                        </td>
                     </tr>
+                </table>
+                
+                <div style="padding: 10px; font-size: 0.85rem; font-weight: bold; border-top: 1px solid black; border-bottom: 1px solid black;">
+                    BPCL PAN NO:AAACB2902M GSTN : 19AAACB2902M1ZQ
+                </div>
+
+                <table class="grid-table no-left-border no-right-border no-bottom-border" id="itemsTable" style="margin-top: 0;">
+                    <thead>
+                        <tr>
+                            <th style="width: 8%; text-align: center;">SR NO.</th>
+                            <th style="width: 15%; text-align: center;">HSN/SAC</th>
+                            <th style="width: 45%; text-align: center;">Description</th>
+                            <th style="width: 10%; text-align: center;">QNTY</th>
+                            <th style="width: 10%; text-align: center;">RATE</th>
+                            <th style="width: 12%; text-align: center;">Amount</th>
+                            <th class="action-col no-print"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoiceTableBody">
+                        <tr class="item-row">
+                            <td style="text-align: center;"><div contenteditable="true" class="editable-field">1</div></td>
+                            <td style="text-align: center;"><div contenteditable="true" class="editable-field">996211</div></td>
+                            <td><div contenteditable="true" class="editable-field">Stamping fee for the year 2025-2026</div></td>
+                            <td style="text-align: center;"><div contenteditable="true" class="editable-field val-qty">4</div></td>
+                            <td style="text-align: center;"><div contenteditable="true" class="editable-field val-rate">1500</div></td>
+                            <td style="text-align: center; font-weight: 500;" class="val-amount">6000</td>
+                            <td class="action-col no-print"><button class="btn-small btn-clear" onclick="deleteRow(this)">X</button></td>
+                        </tr>
+                    </tbody>
+                    
+                    <tbody id="totalsBody">
+                        <tr>
+                            <td colspan="3" rowspan="3" style="vertical-align: bottom; font-weight: bold; font-size: 0.9rem;">
+                                (Rs. <span id="wordsOutput">Six Thousand Only</span>)
+                            </td>
+                            <td colspan="2" style="text-align: right;">CGST</td>
+                            <td style="text-align: center;"><div contenteditable="true" class="editable-field val-tax" data-placeholder="NA">NA</div></td>
+                            <td class="action-col no-print"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="text-align: right;">SGST</td>
+                            <td style="text-align: center;"><div contenteditable="true" class="editable-field val-tax" data-placeholder="NA">NA</div></td>
+                            <td class="action-col no-print"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="text-align: right; font-weight: bold;">TOTAL</td>
+                            <td style="text-align: center; font-weight: bold;" id="finalTotalOutput">6000</td>
+                            <td class="action-col no-print"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="controls-row no-print">
+                    <button class="btn-small" onclick="addItemRow()">+ Add Row</button>
+                </div>
+
+                <table class="grid-table no-left-border no-right-border no-bottom-border" style="border-top: 2px solid black;">
                     <tr>
-                        <td colspan="2" style="text-align: right;">SGST</td>
-                        <td style="text-align: center;"><div contenteditable="true" class="editable-field val-tax" data-placeholder="NA">NA</div></td>
-                        <td class="action-col no-print"></td>
+                        <td style="width: 15%; border: none; font-weight: bold; text-decoration: underline;">Enclosure:</td>
+                        <td style="width: 85%; border: none; line-height: 1.8;">
+                            Original Receipt GRN No. 
+                            <span contenteditable="true" class="editable-field inline-edit">192025260282661698</span> 
+                            Dated: <span contenteditable="true" class="editable-field inline-edit" style="min-width: 90px;">22-09-2025</span><br>
+                            
+                            Original Certificate No- 
+                            <span contenteditable="true" class="editable-field inline-edit">WB/15/0038/2025/000467</span> 
+                            Dated: <span contenteditable="true" class="editable-field inline-edit" style="min-width: 90px;">29-10-2025</span>
+                        </td>
                     </tr>
-                    <tr>
-                        <td colspan="2" style="text-align: right; font-weight: bold;">TOTAL</td>
-                        <td style="text-align: center; font-weight: bold;" id="finalTotalOutput">6000</td>
-                        <td class="action-col no-print"></td>
-                    </tr>
-                </tbody>
-            </table>
+                </table>
 
-            <div class="controls-row no-print">
-                <button class="btn-small" onclick="addItemRow()">+ Add Row</button>
-            </div>
+                <div class="signature-box">
+                    <strong>(Name/Signature/Seal of the Dealer)</strong>
+                </div>
 
-            <table class="grid-table no-left-border no-right-border no-bottom-border" style="border-top: 2px solid black;">
-                <tr>
-                    <td style="width: 15%; border: none; font-weight: bold; text-decoration: underline;">Enclosure:</td>
-                    <td style="width: 85%; border: none; line-height: 1.8;">
-                        Original Receipt GRN No. 
-                        <span contenteditable="true" class="editable-field inline-edit">192025260282661698</span> 
-                        Dated: <span contenteditable="true" class="editable-field inline-edit" style="min-width: 90px;">22-09-2025</span><br>
-                        
-                        Original Certificate No- 
-                        <span contenteditable="true" class="editable-field inline-edit">WB/15/0038/2025/000467</span> 
-                        Dated: <span contenteditable="true" class="editable-field inline-edit" style="min-width: 90px;">29-10-2025</span>
-                    </td>
-                </tr>
-            </table>
-
-            <div style="margin-top: 120px; padding-right: 30px; text-align: right; font-size: 0.95rem;">
-                <strong>(Name/Signature/Seal of the Dealer)</strong>
-            </div>
-
-        </div> 
-    </div>
-
-    <div class="bottom-bar no-print">
-        <div class="bar-content">
-            <div class="branding">Bahar Corporate Engine <span>Quick Invoice</span></div>
-            <div class="actions">
-                <button class="btn-main btn-primary" onclick="window.print()">🖨️ Print Invoice</button>
-                <button class="btn-main btn-save" onclick="saveInvoice()" id="saveBtn">💾 Save Draft</button>
-                <button class="btn-main btn-reset" onclick="clearInvoice()">🗑️ Reset All</button>
-            </div>
+            </div> 
         </div>
     </div>
 
-    <script>
+    <div id="bahar-control-panel" data-module="stamping"></div>
+
+    <script src="js/header.js"></script>
+    <script src="js/panel.js"></script>
+
+<script>
         function numberToWords(num) {
             if (num === 0) return "Zero";
             const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
@@ -317,16 +291,42 @@
         }
 
         function saveInvoice() {
+            if (window.getSelection) {
+                window.getSelection().removeAllRanges();
+            }
             const invoiceHTML = document.getElementById('printableInvoice').innerHTML;
             localStorage.setItem('BaharSaved_SingleInvoice', invoiceHTML);
+            
             const btn = document.getElementById('saveBtn');
-            btn.innerText = "✅ Saved!";
-            setTimeout(() => btn.innerText = "💾 Save Draft", 2000);
+            if(btn) {
+                const originalContent = btn.innerHTML;
+                btn.innerHTML = `<i class="fa-solid fa-check"></i> Saved!`;
+                setTimeout(() => btn.innerHTML = originalContent, 2000);
+            }
         }
 
         function loadInvoice() {
-            const savedData = localStorage.getItem('BaharSaved_SingleInvoice');
-            if (savedData) document.getElementById('printableInvoice').innerHTML = savedData;
+            let savedData = localStorage.getItem('BaharSaved_SingleInvoice');
+            if (savedData) {
+                document.getElementById('printableInvoice').innerHTML = savedData;
+            }
+
+            const headerContainer = document.getElementById('bahar-document-header');
+            if (headerContainer) {
+                headerContainer.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 4px solid #004b87; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Official_BPCL_LOGO.jpg" alt="BPCL" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 80px; height: auto;">
+                        <div style="text-align: center; width: 100%; padding: 0 90px;">
+                            <h1 style="margin:0; color:#004b87; font-size: 1.6rem; font-weight: 800; letter-spacing: 1px;">M/S. BAHAR SERVICE STATION</h1>
+                            <p style="margin:4px 0 2px 0; font-weight: 700; font-size: 1rem; color: black;">DEALER: BHARAT PETROLEUM CORP LTD.</p>
+                            <p style="margin:2px 0; font-size: 0.85rem; color: #334155;">VILL-DEVOKE, P.O.MAMUDPUR, P.S.SHIBDASPUR, DIST-N24 PARGANAS, PIN 743166, WB</p>
+                            <p style="margin:2px 0; font-size: 0.85rem; color: #334155;">CONTACT - 7018579966, 9088086294</p>
+                            <p style="margin:2px 0; font-size: 0.85rem; color: #334155;">EMAIL - BAHARSERVICESTATION@GMAIL.COM</p>
+                        </div>
+                    </div>
+                `;
+            }
+
             document.getElementById('printableInvoice').addEventListener('input', calculateAll);
         }
 
@@ -341,7 +341,6 @@
             loadInvoice(); 
             calculateAll(); 
             
-            // Handle row deletion logic after potential storage load
             window.deleteRow = function(btn) {
                 btn.closest('tr').remove();
                 document.querySelectorAll('.item-row').forEach((row, index) => {
