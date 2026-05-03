@@ -74,6 +74,11 @@
         }
         .preview-paper .editable-field { border: none !important; padding: 0 !important; background: transparent !important; }
 
+        /* ENSURES ROWS AND TOTALS DO NOT BREAK IN HALF DURING PDF GENERATION */
+        .invoice-table tr, .invoice-table tfoot, .controls-row {
+            page-break-inside: avoid !important;
+        }
+
         @media print {
             @page { size: A4 portrait; margin: 15mm; }
             body { background: white; margin: 0; padding: 0; }
@@ -98,8 +103,11 @@
         <div class="header-text"><h1>BAHAR SERVICE STATION</h1><p>FUEL BILLING ENGINE</p></div>
     </header>
     <nav class="nav-ribbon">
-        <a href="index.html"><i class="fa-solid fa-house"></i> Dashboard Home</a>
+        <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
         <a href="fuelinvoice.html" class="active"><i class="fa-solid fa-gas-pump"></i> Fuel Billing</a>
+        <a href="stamping.html"><i class="fa-solid fa-file-invoice-dollar"></i> Stamping Bill</a>
+        <a href="letter-templates.html"><i class="fa-solid fa-file-pen"></i> Letter</a>
+        <a href="compliance.html"><i class="fa-solid fa-folder-open"></i> Compliance</a>
     </nav>
 
     <div class="app-workspace">
@@ -178,7 +186,9 @@
                     <tr class="total-row" id="grossTotalRow" style="font-weight:bold; border-top: 2px solid #000; background-color: #f1f5f9;">
                     </tr>
                 </tbody>
-                <tfoot>
+
+                <!-- GLUED TOTALS AND SIGNATURE BLOCK -->
+                <tbody style="page-break-inside: avoid !important;">
                     <tr>
                         <td class="footer-desc-cell" style="text-align: right;">Rounding Off (+/-)</td>
                         <td id="roundingOutput" style="text-align: right; width:120px;">0.00</td>
@@ -189,7 +199,17 @@
                         <td style="text-align: right; width:120px;">₹<span id="finalNetOutput">0.00</span></td>
                         <td class="action-col no-print"></td>
                     </tr>
-                </tfoot>
+                    <!-- SIGNATURE EMBEDDED DIRECTLY IN THE TABLE SO IT NEVER SEPARATES -->
+                    <tr style="border: none !important; background-color: white !important;">
+                        <td colspan="10" style="border: none !important; text-align: right; padding-top: 25px !important; padding-right: 0 !important;">
+                            <div style="display: inline-block; text-align: center;">
+                                <p style="margin: 0;">Yours faithfully,</p>
+                                <br><br>
+                                <strong contenteditable="true" class="editable-field" style="width: auto;">M/S. Bahar Service Station</strong>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
 
             <div class="controls-row no-print">
@@ -197,15 +217,7 @@
                 <button class="btn-small btn-ui btn-action" onclick="addColumn()">+ Add Column</button>
                 <button class="btn-small btn-ui" style="background:#8b5cf6;" onclick="addAdjustmentRow()">+ Add Deduction/Tax</button>
             </div>
-
-            <div style="margin-top: 3rem; display: flex; justify-content: space-between; font-size: 0.95rem; page-break-inside: avoid;">
-                <div></div>
-                <div style="text-align: center;">
-                    <p style="margin: 0;">Yours faithfully,</p>
-                    <br><br><br>
-                    <strong contenteditable="true" class="editable-field">M/S. Bahar Service Station</strong>
-                </div>
-            </div>
+            
         </div>
     </div>
 
@@ -436,9 +448,11 @@
             const originalShadow = element.style.boxShadow;
             element.style.boxShadow = 'none';
 
+            // UPDATED OPTIONS FOR WORD-LIKE PAGINATION
             const opt = {
-                margin:       0, 
+                margin:       [15, 15, 15, 15], 
                 filename:     finalFilename,
+                pagebreak:    { mode: ['css', 'legacy'], avoid: ['tr', 'tfoot', '.controls-row'] }, 
                 image:        { type: 'jpeg', quality: 1 },
                 html2canvas:  { scale: 2, useCORS: true, windowWidth: 850 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -490,7 +504,6 @@
                 });
             }
 
-            // EXPLICITLY CALL header.js FUNCTION to overwrite old headers!
             if (typeof injectBaharHeader === 'function') {
                 injectBaharHeader();
             }
